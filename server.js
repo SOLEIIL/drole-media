@@ -56,7 +56,13 @@ app.get(/^\/(?!api|uploads).*/, (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Serveur lancé sur le port ${PORT}`);
-  console.log(`Front-end disponible sur http://localhost:${PORT}`);
-});
+
+// Export pour Vercel
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Serveur lancé sur le port ${PORT}`);
+    console.log(`Front-end disponible sur http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
