@@ -7,12 +7,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connexion MongoDB
+// Connexion MongoDB avec gestion d'erreur
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/drole', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log('MongoDB connecté'))
-  .catch((err) => console.error('Erreur MongoDB:', err));
+  .catch((err) => {
+    console.error('Erreur MongoDB:', err);
+    // Ne pas faire planter l'app si MongoDB n'est pas disponible
+  });
 
 // Routes API
 const videosRoutes = require('../routes/videos');
@@ -37,6 +40,12 @@ app.get('/api/test', (req, res) => {
 // Route pour servir l'application front-end
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Gestion d'erreur globale
+app.use((err, req, res, next) => {
+  console.error('Erreur serveur:', err);
+  res.status(500).json({ error: 'Erreur interne du serveur' });
 });
 
 module.exports = app; 
