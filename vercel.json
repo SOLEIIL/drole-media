@@ -21,7 +21,7 @@
     }
   ],
   "env": {
-    "MONGODB_URI": "mongodb+srv://solanaemperor:<db_password>@drole-media.lua2h8z.mongodb.net/drole?retryWrites=true&w=majority&appName=drole-media",
+    "MONGODB_URI": "mongodb+srv://solanaemperor:4LB7BGEA4UovwCGF@drole-media.lua2h8z.mongodb.net/drole?retryWrites=true&w=majority&appName=drole-media",
     "JWT_SECRET": "votre_secret_jwt_super_securise_123456"
   }
 } 
