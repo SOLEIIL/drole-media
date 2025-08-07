@@ -50,8 +50,8 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'API fonctionne !' });
 });
 
-// Route pour servir l'application front-end (uniquement pour les routes qui ne sont pas /api ou /uploads)
-app.get(/^\/(?!api|uploads).*/, (req, res) => {
+// Route pour servir l'application front-end (uniquement pour les routes qui ne sont pas /api)
+app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
