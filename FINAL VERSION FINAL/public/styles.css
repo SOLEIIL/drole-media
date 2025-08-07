@@ -1,0 +1,2039 @@
+/* Apple-like Clean & Minimalist Design - Noir & Blanc */
+:root {
+    --primary-color: #000000;
+    --secondary-color: #ffffff;
+    --text-color: #000000;
+    --border-radius: 24px;
+    --shadow: 0 16px 48px rgba(0,0,0,0.24);
+    --card-bg: #ffffff;
+    --input-bg: #f8f8f8;
+    --input-border: #e0e0e0;
+    --btn-hover: #333333;
+    --modal-bg: #ffffff;
+    --alert-bg: #ffffff;
+    --category-bg: #f0f0f0;
+    --category-text: #000000;
+    --section-bg: #ffffff;
+    --body-bg: #ffffff;
+    
+    /* Couleurs bleues uniformes */
+    --primary-blue: #007bff;
+    --secondary-blue: #0056b3;
+    --light-blue: #e3f2fd;
+    --dark-blue: #004085;
+}
+
+/* Styles spécifiques pour les droits d'auteur */
+.copyright-header {
+    color: #000000 !important;
+    font-weight: 600;
+}
+
+.dark-mode .copyright-header {
+    color: #ffffff !important;
+}
+
+/* Correction de l'alignement de la checkbox */
+.form-check {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+}
+
+.form-check-input {
+    margin-top: 0.125rem !important;
+    margin-right: 0 !important;
+    flex-shrink: 0 !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+}
+
+/* Styles spécifiques pour la checkbox des conditions */
+#termsAgreement {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 10 !important;
+    background-color: #fff !important;
+    border: 2px solid #ccc !important;
+    border-radius: 3px !important;
+    appearance: auto !important;
+    -webkit-appearance: auto !important;
+    -moz-appearance: auto !important;
+}
+
+#termsAgreement:checked {
+    background-color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e") !important;
+    background-size: 12px 12px !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Mode sombre pour la checkbox */
+.dark-mode #termsAgreement {
+    background-color: #2a2a2a !important;
+    border-color: #404040 !important;
+}
+
+.dark-mode #termsAgreement:checked {
+    background-color: #4da6ff !important;
+    border-color: #4da6ff !important;
+}
+
+/* Styles pour les liens des conditions */
+.terms-link {
+    color: var(--primary-blue) !important;
+    text-decoration: underline !important;
+    cursor: pointer !important;
+    transition: color 0.2s ease !important;
+}
+
+.terms-link:hover {
+    color: var(--secondary-blue) !important;
+    text-decoration: underline !important;
+}
+
+.dark-mode .terms-link {
+    color: #4da6ff !important;
+}
+
+.dark-mode .terms-link:hover {
+    color: #66b3ff !important;
+}
+
+/* Correction des onglets pour éviter les superpositions */
+.tab-pane {
+    display: none !important;
+}
+
+.tab-pane.show,
+.tab-pane.active {
+    display: block !important;
+}
+
+/* S'assurer qu'un seul onglet est visible à la fois */
+.tab-content > .tab-pane:not(.show):not(.active) {
+    display: none !important;
+}
+
+/* Animation de transition pour les onglets */
+.tab-pane.fade {
+    transition: opacity 0.15s linear;
+}
+
+.tab-pane.fade:not(.show) {
+    opacity: 0;
+}
+
+/* Amélioration de l'alignement des vidéos en attente */
+.admin-video-item {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: var(--bs-body-bg);
+}
+
+.admin-video-item .row {
+    align-items: flex-start;
+}
+
+.admin-video-item .col-md-8 {
+    padding-right: 1rem;
+}
+
+.admin-video-item .col-md-4 {
+    padding-left: 1rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 20px;
+}
+
+.video-preview-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.video-preview {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+    border: none !important;
+    outline: none !important;
+}
+
+/* Suppression des bordures blanches des vidéos */
+video {
+    border: none !important;
+    outline: none !important;
+}
+
+video::-webkit-media-controls {
+    border: none !important;
+    outline: none !important;
+}
+
+video::-webkit-media-controls-panel {
+    border: none !important;
+    outline: none !important;
+}
+
+.video-preview:hover {
+    transform: scale(1.02);
+}
+
+/* Amélioration de l'apparence des badges */
+.copyright-info .badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Uniformisation des couleurs des badges */
+.copyright-info .badge.bg-primary {
+    background-color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+}
+
+.copyright-info .badge.bg-warning {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+/* Amélioration de l'espacement */
+.copyright-info h6 {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.form-check-label {
+    line-height: 1.4;
+    margin-top: 0;
+    flex: 1;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+/* Uniformisation des couleurs bleues */
+:root {
+    --primary-blue: #007bff;
+    --secondary-blue: #0056b3;
+    --light-blue: #e3f2fd;
+    --dark-blue: #004085;
+}
+
+/* Application du bleu uniforme */
+.btn-primary {
+    background-color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-blue) !important;
+    border-color: var(--secondary-blue) !important;
+}
+
+.btn-outline-primary {
+    color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+}
+
+.btn-outline-primary:not(:disabled):not(.disabled):active,
+.btn-outline-primary:not(:disabled):not(.disabled).active {
+    background-color: var(--secondary-blue) !important;
+    border-color: var(--secondary-blue) !important;
+}
+
+/* Boutons radio pour les questions de copyright */
+.btn-check:checked + .btn-outline-primary {
+    background-color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+    color: #ffffff !important;
+}
+
+.btn-check:checked + .btn-outline-primary:hover {
+    background-color: var(--secondary-blue) !important;
+    border-color: var(--secondary-blue) !important;
+}
+
+/* Mode sombre pour les boutons radio */
+.dark-mode .btn-check:checked + .btn-outline-primary {
+    background-color: #4da6ff !important;
+    border-color: #4da6ff !important;
+    color: #000000 !important;
+}
+
+.dark-mode .btn-check:checked + .btn-outline-primary:hover {
+    background-color: #66b3ff !important;
+    border-color: #66b3ff !important;
+}
+
+/* Liens soulignés en bleu uniforme */
+.form-check-label strong u {
+    color: var(--primary-blue) !important;
+    text-decoration-color: var(--primary-blue) !important;
+}
+
+.form-check-label strong u:hover {
+    color: var(--secondary-blue) !important;
+    text-decoration-color: var(--secondary-blue) !important;
+}
+
+/* Mode sombre - bleus plus clairs */
+.dark-mode .btn-outline-primary {
+    color: #4da6ff !important;
+    border-color: #4da6ff !important;
+}
+
+/* Uniformisation des couleurs bleues dans le dashboard admin */
+.text-primary {
+    color: var(--primary-blue) !important;
+}
+
+.text-info {
+    color: var(--primary-blue) !important;
+}
+
+.badge.bg-primary {
+    background-color: var(--primary-blue) !important;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+}
+
+/* Suppression complète des bordures des onglets admin */
+#adminPanelModal .nav-tabs {
+    border-bottom: 2px solid var(--input-border);
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+}
+
+#adminPanelModal .nav-tabs .nav-link,
+#adminPanelModal .nav-tabs .nav-link.active,
+#adminPanelModal .nav-tabs .nav-link:hover {
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Amélioration de la lisibilité des onglets inactifs */
+#adminPanelModal .nav-tabs .nav-link:not(.active) {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    font-weight: 500;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(5px);
+}
+
+/* Correction du positionnement bizarre de "Mes Vidéos" dans le dashboard utilisateur */
+#userDashboardModal .nav-tabs {
+    border-bottom: 2px solid var(--input-border);
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+#userDashboardModal .nav-tabs .nav-link {
+    border: none !important;
+    border-radius: 8px 8px 0 0;
+    margin-right: 5px;
+    color: var(--text-color);
+    opacity: 0.7;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+    background: transparent;
+    padding: 0.75rem 1.5rem;
+}
+
+#userDashboardModal .nav-tabs .nav-link.active {
+    background: var(--primary-blue) !important;
+    color: white !important;
+    opacity: 1;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    position: relative;
+    z-index: 3;
+}
+
+#userDashboardModal .nav-tabs .nav-link:hover {
+    opacity: 1;
+    background: var(--btn-hover);
+    color: white;
+    position: relative;
+    z-index: 2;
+}
+
+/* Suppression des bordures et contours indésirables */
+#userDashboardModal .nav-tabs .nav-link,
+#userDashboardModal .nav-tabs .nav-link.active,
+#userDashboardModal .nav-tabs .nav-link:hover {
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Styles pour la section paiement */
+.payment-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--input-border);
+}
+
+.payment-section h6 {
+    color: var(--text-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.form-check-inline {
+    margin-right: 1.5rem;
+}
+
+.form-check-inline .form-check-input {
+    margin-right: 0.5rem;
+}
+
+.form-check-inline .form-check-label {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.form-check-inline .form-check-input:checked + .form-check-label {
+    color: var(--primary-blue);
+}
+
+/* Animation pour les sections de paiement */
+.payment-section {
+    transition: all 0.3s ease;
+}
+
+.payment-section:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-blue);
+}
+
+/* Styles pour les icônes de paiement */
+.fab.fa-paypal {
+    color: #0070ba;
+}
+
+.fab.fa-bitcoin {
+    color: #f7931a;
+}
+
+.fas.fa-university {
+    color: #28a745;
+}
+
+/* Responsive pour la section paiement */
+@media (max-width: 768px) {
+    .payment-section {
+        padding: 1rem;
+    }
+    
+    .form-check-inline {
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+}
+
+.dark-mode .btn-outline-primary:hover,
+.dark-mode .btn-outline-primary:focus,
+.dark-mode .btn-outline-primary:active {
+    background-color: #4da6ff !important;
+    border-color: #4da6ff !important;
+    color: #000000 !important;
+}
+
+.dark-mode .form-check-label strong u {
+    color: #4da6ff !important;
+    text-decoration-color: #4da6ff !important;
+}
+
+.dark-mode .form-check-label strong u:hover {
+    color: #66b3ff !important;
+    text-decoration-color: #66b3ff !important;
+}
+
+body {
+    font-family: 'SF Pro Display', 'Segoe UI', Arial, sans-serif;
+    background: var(--body-bg);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    transition: background 0.3s, color 0.3s;
+    line-height: 1.6;
+}
+
+/* MODE SOMBRE */
+.dark-mode {
+    --primary-color: #ffffff;
+    --secondary-color: #000000;
+    --text-color: #ffffff;
+    --card-bg: #1a1a1a;
+    --input-bg: #2a2a2a;
+    --input-border: #404040;
+    --btn-hover: #cccccc;
+    --shadow: 0 8px 32px rgba(0,0,0,0.25);
+    --modal-bg: #1a1a1a;
+    --alert-bg: #1a1a1a;
+    --category-bg: #404040;
+    --category-text: #ffffff;
+    --section-bg: #000000;
+    --body-bg: #000000;
+    --border-radius: 24px;
+}
+
+.navbar {
+    background: var(--card-bg) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    margin-bottom: 10px;
+    position: relative;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.navbar-brand {
+    color: var(--primary-color) !important;
+    font-weight: 700;
+    font-size: 1.7rem;
+    letter-spacing: 1px;
+}
+
+.nav-link {
+    color: var(--text-color) !important;
+    font-weight: 500;
+    margin-right: 10px;
+    border-radius: var(--border-radius);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.nav-link.active, .nav-link:hover {
+    background: var(--primary-blue);
+    color: var(--secondary-color) !important;
+    transform: translateY(-1px);
+}
+
+/* Switch mode sombre dans la navbar */
+#darkModeToggle {
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 8px 12px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    height: auto;
+    line-height: 1;
+    pointer-events: auto;
+    user-select: none;
+}
+
+
+
+#darkModeToggle:hover {
+    background: var(--primary-color);
+    color: var(--secondary-color);
+    transform: scale(1.05) translateY(-1px);
+}
+
+/* Styles pour la bibliothèque modale */
+.library-video-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.library-video-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.library-video-thumbnail {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.library-video-thumbnail video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.library-play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.library-video-thumbnail:hover .library-play-overlay {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.library-admin-actions {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.library-video-thumbnail:hover .library-admin-actions {
+    opacity: 1;
+}
+
+.library-video-info {
+    background: var(--card-bg);
+}
+
+.library-video-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+    color: var(--text-color);
+}
+
+.library-video-title:hover {
+    color: var(--primary-color);
+}
+
+/* Responsive pour la grille */
+@media (max-width: 576px) {
+    .library-video-thumbnail {
+        height: 100px;
+    }
+    
+    .library-play-overlay {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+}
+
+
+
+/* Styles pour l'aperçu vidéo dans le dashboard utilisateur */
+.user-video-thumbnail {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.user-video-thumbnail:hover {
+    transform: scale(1.05);
+}
+
+.user-video-thumbnail[onclick] {
+    cursor: pointer;
+}
+
+.user-video-thumbnail[onclick]:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.user-video-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.user-video-thumbnail:hover .user-video-overlay {
+    opacity: 1;
+}
+
+/* Pour les vidéos cliquables, l'overlay est toujours visible */
+.user-video-thumbnail[onclick] .user-video-overlay {
+    opacity: 1;
+}
+
+/* Styles pour assurer la cohérence des cartes vidéo utilisateur */
+.user-video-card {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+}
+
+.user-video-card .card-body {
+    padding: 1rem;
+    width: 100%;
+}
+
+.user-video-card .row {
+    align-items: center;
+    min-height: 80px;
+}
+
+.user-video-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+
+/* Fix pour le border-radius en mode sombre */
+.dark-mode .hero-section {
+    border-radius: 24px !important;
+    border: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+}
+
+/* Règle supplémentaire pour s'assurer que le border-radius est appliqué */
+.dark-mode section.hero-section {
+    border-radius: 24px !important;
+}
+
+.dark-mode .card {
+    border-radius: 24px !important;
+}
+
+.dark-mode .stat-card {
+    border-radius: 24px !important;
+}
+
+.dark-mode .user-video-card {
+    border-radius: 24px !important;
+}
+
+/* Amélioration de l'apparence des cartes en mode sombre */
+.dark-mode .user-video-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.dark-mode .user-video-card:hover {
+    border-color: rgba(255,255,255,0.2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+#darkModeToggle:active {
+    transform: scale(0.95);
+}
+
+/* Empêcher les clics multiples rapides */
+#darkModeToggle.disabled {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+/* Correction pour l'alignement des nav-links */
+.navbar-nav .nav-item {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 8px 12px;
+}
+
+/* Navigation par catégories */
+.categories-nav {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    margin: 100px 0 60px 0;
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+}
+
+.categories-nav h4 {
+    color: var(--text-color);
+    margin-bottom: 18px;
+    font-weight: 600;
+}
+
+.category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.category-filter {
+    background: var(--category-bg);
+    color: var(--category-text);
+    border: none;
+    border-radius: 20px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.category-filter:hover {
+    background: var(--primary-color);
+    color: var(--secondary-color);
+    transform: translateY(-1px);
+    opacity: 1;
+}
+
+.category-filter.active {
+    background: var(--primary-color);
+    color: var(--secondary-color);
+    transform: translateY(-1px);
+    opacity: 1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.reset-filter {
+    background: #dc3545 !important;
+    color: white !important;
+    opacity: 1 !important;
+}
+
+.reset-filter:hover {
+    background: #c82333 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220,53,69,0.3);
+}
+
+.hero-section {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.1);
+    margin: 60px auto 0 auto;
+    padding: 60px 0 40px 0;
+    max-width: 900px;
+    text-align: center;
+    position: relative;
+    overflow: visible;
+    border: 1px solid rgba(0,0,0,0.05);
+    z-index: 10;
+}
+
+.hero-section::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: -10px;
+    right: -10px;
+    height: 60px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.08) 30%, rgba(0,0,0,0.03) 70%, transparent 100%);
+    border-radius: 50%;
+    filter: blur(15px);
+    z-index: 5;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    pointer-events: none;
+}
+
+.hero-section h1 {
+    font-weight: 800;
+    font-size: 2.7rem;
+    margin-bottom: 18px;
+    color: var(--primary-color);
+    position: relative;
+    z-index: 1;
+}
+
+.hero-section .lead {
+    color: var(--text-color);
+    font-size: 1.2rem;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+}
+
+.stats-container {
+    margin-top: 30px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-color));
+    opacity: 0.8;
+}
+
+.stat-card h3 {
+    font-size: 2.1rem;
+    color: var(--text-color);
+    font-weight: 700;
+}
+
+.stat-card p {
+    color: var(--text-color);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.card {
+    background: var(--card-bg);
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+}
+
+.card-header {
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+    background: var(--primary-color) !important;
+    color: var(--secondary-color) !important;
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding: 24px 32px;
+}
+
+.card-body {
+    border-radius: 0 0 var(--border-radius) var(--border-radius) !important;
+    padding: 32px 32px 24px 32px;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 12px 32px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.btn-primary:hover {
+    background: var(--btn-hover);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    transform: translateY(-1px);
+}
+
+input, textarea, select {
+    background: var(--input-bg) !important;
+    border: 1.5px solid var(--input-border) !important;
+    border-radius: var(--border-radius) !important;
+    font-size: 1rem;
+    color: var(--text-color);
+    padding: 14px 18px !important;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+}
+
+/* Correction pour le texte en mode sombre dans les formulaires */
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+    color: #ffffff !important;
+}
+
+/* Correction pour les placeholders en mode sombre */
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+    color: #cccccc !important;
+}
+
+/* Correction pour les labels en mode sombre */
+.dark-mode label {
+    color: #ffffff !important;
+}
+
+/* Correction pour le texte des formats acceptés en mode sombre */
+.dark-mode .text-muted {
+    color: #cccccc !important;
+}
+
+/* Correction pour le texte des vidéos en mode sombre */
+.dark-mode .video-title,
+.dark-mode .video-description,
+.dark-mode .video-meta {
+    color: #ffffff !important;
+}
+
+/* Ajustement du bouton de sélection de fichier */
+input[type="file"] {
+    padding: 14px 18px !important;
+    font-size: 1rem !important;
+    line-height: 1.2 !important;
+    height: auto !important;
+}
+
+.dark-mode input[type="file"] {
+    color: #ffffff !important;
+}
+
+/* Styles pour la zone de description */
+textarea {
+    resize: none !important;
+    min-height: 120px !important;
+    font-family: inherit !important;
+    line-height: 1.5 !important;
+}
+
+textarea:focus {
+    min-height: 150px !important;
+}
+
+/* Compteur de caractères pour la description */
+.char-counter {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    text-align: right;
+    margin-top: 5px;
+}
+
+.dark-mode .char-counter {
+    color: #cccccc !important;
+}
+
+.video-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 300px;
+    border: 1px solid rgba(0,0,0,0.05);
+    position: relative;
+}
+
+.video-card:hover {
+    box-shadow: 0 16px 48px rgba(0,0,0,0.24);
+    transform: translateY(-4px);
+}
+
+.video-thumbnail {
+    background: #000;
+    height: 150px;
+    position: relative;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.video-thumbnail::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7));
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.video-card:hover .video-thumbnail::before {
+    opacity: 1;
+}
+
+.video-thumbnail video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    transition: transform 0.3s ease;
+    display: block;
+}
+
+.video-card:hover .video-thumbnail video {
+    transform: scale(1.02);
+}
+
+.play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    z-index: 2;
+    transition: all 0.3s ease;
+    opacity: 0.9;
+}
+
+.video-thumbnail:hover .play-button {
+    background: rgba(0, 0, 0, 0.9);
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+}
+
+.video-duration {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    z-index: 2;
+}
+
+.video-info {
+    padding: 15px 15px 12px 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.video-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    line-height: 1.4;
+}
+
+.video-description {
+    color: var(--text-color);
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--input-border);
+}
+
+.video-category {
+    background: var(--category-bg);
+    color: var(--category-text);
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.video-category:hover {
+    background: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+footer {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    box-shadow: var(--shadow);
+    margin-top: 40px;
+}
+
+.alert {
+    border-radius: var(--border-radius);
+    border: none;
+    font-size: 1rem;
+    padding: 16px 22px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+    background: var(--alert-bg);
+    color: var(--text-color);
+    transition: all 0.2s ease;
+}
+
+.alert:hover {
+    transform: translateY(-1px);
+}
+
+/* Notifications discrètes au centre de l'écran */
+.notification-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    border-radius: var(--border-radius);
+    border: none;
+    font-size: 1rem;
+    padding: 20px 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    background: var(--alert-bg);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+    max-width: 400px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.notification-toast.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.notification-toast.hide {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+}
+
+/* Sections avec fond */
+/* Styles des sections */
+section {
+    background: var(--section-bg);
+    transition: all 0.3s ease;
+    padding: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+section.py-5 {
+    background: var(--section-bg);
+    padding: 20px 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Ajustement spécifique pour la première section */
+section:first-of-type {
+    padding-top: 30px;
+}
+
+/* Container centré et responsive */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+}
+
+/* Grille de vidéos récentes */
+#videosContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    padding: 15px 0;
+}
+
+/* Animation d'apparition des sections */
+section {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Espacement des sections */
+section + section {
+    margin-top: 5px;
+}
+
+/* Ajustements spécifiques */
+#submit, .categories-nav {
+    padding: 15px 0;
+}
+
+/* Correction pour les sections blanches en mode sombre */
+.dark-mode section {
+    background: var(--section-bg);
+}
+
+.dark-mode .bg-light {
+    background: var(--section-bg) !important;
+}
+
+/* Admin Panel */
+.admin-video-item {
+    background: var(--input-bg);
+    border-radius: var(--border-radius);
+    padding: 22px 22px 14px 22px;
+    margin-bottom: 18px;
+    border-left: 4px solid var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: all 0.2s ease;
+}
+
+.admin-video-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+/* Aperçu vidéo dans le panel admin */
+.video-preview-section {
+    margin-bottom: 15px;
+}
+
+.video-preview-container {
+    margin: 10px 0;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 300px;
+}
+
+.video-preview {
+    width: 100%;
+    max-height: 150px;
+    object-fit: cover;
+    background: #000;
+    border-radius: var(--border-radius);
+}
+
+/* Thumbnail pour les vidéos approuvées */
+.video-thumbnail-small {
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.video-thumbnail-small video {
+    transition: transform 0.2s ease;
+}
+
+.video-thumbnail-small:hover video {
+    transform: scale(1.05);
+}
+
+/* Responsive pour l'aperçu vidéo */
+@media (max-width: 768px) {
+    .video-preview {
+        max-height: 200px;
+    }
+}
+
+.admin-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Styles pour les actions dans les vidéos publiques */
+.video-card .admin-actions {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid var(--input-border);
+}
+
+.video-card .admin-actions .btn {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+}
+
+.btn-sm {
+    padding: 8px 22px;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
+    transition: all 0.2s ease;
+}
+
+.btn-sm:hover {
+    transform: translateY(-1px);
+}
+
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 22px;
+    background: var(--input-bg);
+    border-radius: var(--border-radius);
+    margin-bottom: 10px;
+    font-size: 1.08rem;
+    color: var(--text-color);
+    transition: all 0.2s ease;
+}
+
+.category-item:hover {
+    transform: translateY(-1px);
+}
+
+.category-item .btn-danger {
+    padding: 4px 14px;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
+    transition: all 0.2s ease;
+}
+
+.category-item .btn-danger:hover {
+    transform: translateY(-1px);
+}
+
+/* Progress bar */
+.progress {
+    height: 10px;
+    border-radius: var(--border-radius);
+    background: #e9ecef;
+}
+
+.progress-bar {
+    background: var(--primary-color);
+    border-radius: var(--border-radius);
+    transition: width 0.3s ease;
+}
+
+/* Styles communs pour tous les modals */
+.modal {
+    padding-right: 0 !important;
+}
+
+.modal-dialog {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 1rem);
+    margin: 0.5rem auto;
+}
+
+.modal-dialog-centered {
+    min-height: calc(100% - 3.5rem);
+}
+
+.modal-content {
+    background: var(--modal-bg);
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+    position: relative;
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+}
+
+/* Animation d'apparition des modals */
+.modal.fade .modal-dialog {
+    transform: scale(0.95) translateY(-10px);
+    opacity: 0;
+    transition: all 0.2s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Fond sombre pour les modals */
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+/* Styles pour le panel admin */
+/* Styles spécifiques pour chaque modal */
+#adminPanelModal .modal-dialog {
+    max-width: 90%;
+    margin: 1.75rem auto;
+}
+
+#userDashboardModal .modal-dialog {
+    max-width: 85%;
+    margin: 1.75rem auto;
+}
+
+#libraryModal .modal-dialog {
+    max-width: 80%;
+    margin: 1.75rem auto;
+}
+
+#loginModal .modal-dialog {
+    max-width: 400px;
+    margin: 1.75rem auto;
+}
+
+/* Styles spécifiques pour les onglets du modal de login */
+#loginModal .nav-tabs {
+    border-bottom: 2px solid var(--input-border);
+    margin-bottom: 1rem;
+}
+
+#loginModal .nav-tabs .nav-link {
+    border: none;
+    border-radius: 8px 8px 0 0;
+    margin-right: 5px;
+    color: #333;
+    background: #ffffff;
+    opacity: 1;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    border: 1px solid #dee2e6;
+}
+
+#loginModal .nav-tabs .nav-link.active {
+    background: var(--primary-blue);
+    color: white !important;
+    opacity: 1;
+    font-weight: 600;
+    border-color: var(--primary-blue);
+}
+
+#loginModal .nav-tabs .nav-link:hover {
+    opacity: 1;
+    background: var(--btn-hover);
+    color: white !important;
+    border-color: var(--btn-hover);
+}
+
+#loginModal .nav-tabs .nav-link:not(.active) {
+    color: #333 !important;
+    background: #ffffff;
+}
+
+/* Mode sombre pour les onglets - même style que mode clair */
+.dark-mode #loginModal .nav-tabs .nav-link {
+    color: #333 !important;
+    background: #ffffff !important;
+    border-color: #dee2e6 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+.dark-mode #loginModal .nav-tabs .nav-link.active {
+    background: var(--primary-blue) !important;
+    color: white !important;
+    border-color: var(--primary-blue) !important;
+}
+
+.dark-mode #loginModal .nav-tabs .nav-link:hover {
+    background: var(--btn-hover) !important;
+    color: white !important;
+    border-color: var(--btn-hover) !important;
+}
+
+.dark-mode #loginModal .nav-tabs .nav-link:not(.active) {
+    color: #333 !important;
+    background: #ffffff !important;
+}
+
+/* Forcer l'application des styles au chargement */
+.dark-mode #loginModal .nav-tabs .nav-item {
+    display: block !important;
+}
+
+.dark-mode #loginModal .nav-tabs .nav-item .nav-link {
+    color: #333 !important;
+    background: #ffffff !important;
+    border-color: #dee2e6 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* S'assurer que les onglets restent visibles */
+#loginModal .nav-tabs .nav-item {
+    display: block;
+}
+
+#loginModal .nav-tabs .nav-link {
+    display: block;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Style des contenus modaux */
+.modal-content {
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    padding: 1rem;
+}
+
+/* Style des cartes dans les modals */
+.modal .card {
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--input-border);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+#adminPanelModal .card-header {
+    background: var(--section-bg);
+    border-bottom: 1px solid var(--input-border);
+    border-radius: 12px 12px 0 0;
+}
+
+#adminPanelModal .nav-tabs {
+    border-bottom: 2px solid var(--input-border);
+}
+
+#adminPanelModal .nav-tabs .nav-link {
+    border: none !important;
+    border-radius: 8px 8px 0 0;
+    margin-right: 5px;
+    color: #ffffff !important;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    font-weight: 500;
+}
+
+#adminPanelModal .nav-tabs .nav-link.active {
+    background: var(--primary-blue) !important;
+    color: white !important;
+    opacity: 1;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#adminPanelModal .nav-tabs .nav-link:hover {
+    opacity: 1;
+    background: var(--btn-hover);
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+}
+
+.btn-close {
+    border-radius: 50%;
+    background: #eee;
+    width: 32px;
+    height: 32px;
+    opacity: 1;
+    transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+    transform: scale(1.1);
+}
+
+/* Responsive */
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 30px 0;
+        max-width: 100%;
+    }
+    
+    .stat-card {
+        margin-bottom: 18px;
+    }
+    
+    .video-card {
+        margin-bottom: 15px;
+        min-height: 280px;
+    }
+    
+    .admin-actions {
+        flex-direction: column;
+    }
+    
+    .admin-actions .btn {
+        width: 100%;
+        margin-bottom: 6px;
+    }
+    
+    .category-filters {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    #darkModeToggle {
+        padding: 6px 10px;
+        font-size: 1rem;
+    }
+    
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .video-thumbnail {
+        height: 130px;
+    }
+    
+    .video-info {
+        padding: 12px 12px;
+    }
+    
+    .video-title {
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+    
+    .video-description {
+        font-size: 0.9rem;
+        -webkit-line-clamp: 2;
+        margin-bottom: 10px;
+    }
+    
+    .video-meta {
+        font-size: 0.85rem;
+        padding-top: 10px;
+    }
+    
+    .video-category {
+        padding: 3px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .video-card {
+        min-height: 260px;
+    }
+    
+    .video-thumbnail {
+        height: 120px;
+    }
+    
+    .video-info {
+        padding: 10px 10px;
+    }
+    
+    .video-title {
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+    }
+    
+    .video-description {
+        font-size: 0.85rem;
+        -webkit-line-clamp: 2;
+        margin-bottom: 8px;
+    }
+    
+    .video-meta {
+        font-size: 0.8rem;
+        padding-top: 8px;
+    }
+    
+    .video-category {
+        padding: 2px 8px;
+        font-size: 0.75rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.video-card {
+    animation: fadeIn 0.3s ease-out, slideUp 0.3s ease-out;
+}
+
+.modal.show .modal-content {
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Styles pour les partenaires */
+.partner-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05);
+    height: 100%;
+}
+
+.partner-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.24);
+}
+
+.partner-logo {
+    width: 100%;
+    height: 120px;
+    object-fit: contain;
+    background: var(--input-bg);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    padding: 10px;
+}
+
+.partner-info {
+    padding: 15px;
+}
+
+.partner-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text-color);
+}
+
+.partner-username {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--primary-color) !important;
+}
+
+.partner-description {
+    color: var(--text-color);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.partner-website {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.partner-website:hover {
+    text-decoration: underline;
+}
+
+.partner-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 8px;
+}
+
+.partner-status.active {
+    background: #28a745;
+    color: white;
+}
+
+.partner-status.inactive {
+    background: #6c757d;
+    color: white;
+}
+
+/* Styles pour le formulaire de contact */
+.contact-info p {
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.social-links {
+    margin-top: 10px;
+}
+
+.social-links .btn {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+.social-links .btn:hover {
+    color: white !important;
+    border-color: var(--primary-color) !important;
+    background-color: var(--primary-color) !important;
+}
+
+.dark-mode .social-links .btn {
+    color: #ffffff !important;
+    border-color: #6c757d !important;
+}
+
+.dark-mode .social-links .btn:hover {
+    color: white !important;
+    border-color: var(--primary-color) !important;
+    background-color: var(--primary-color) !important;
+}
+
+/* Compteur de caractères pour le formulaire de contact */
+.contact-char-counter,
+.partner-char-counter {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    text-align: right;
+    margin-top: 5px;
+}
+
+.dark-mode .contact-char-counter,
+.dark-mode .partner-char-counter {
+    color: #cccccc !important;
+}
+
+/* Responsive pour les partenaires */
+@media (max-width: 768px) {
+    .partner-logo {
+        height: 100px;
+    }
+    
+    .partner-name {
+        font-size: 1rem;
+    }
+    
+    .partner-description {
+        font-size: 0.85rem;
+    }
+} 

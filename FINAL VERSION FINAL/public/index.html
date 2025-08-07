@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DROLE - Partage de Vidéos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-video me-2"></i>DROLE
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#home">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#partnersModal">
+                            Partenaires
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#contactModal">
+                            Contact
+                        </a>
+                    </li>
+                                    <li class="nav-item">
+                    <a class="nav-link" href="#bibliotheque">Bibliothèque</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#submit">Soumettre</a>
+                </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal" id="loginLink">Se connecter</a>
+                    </li>
+                    <li class="nav-item">
+                        <button id="darkModeToggle" class="btn btn-link">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Section Accueil -->
+    <section id="home" class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 mb-4">Partagez vos vidéos</h1>
+            <p class="lead mb-5">Découvrez et partagez les meilleures vidéos Francophones !</p>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="stats-container">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <i class="fas fa-video fa-2x mb-3"></i>
+                                    <h3 id="videoCount">0</h3>
+                                    <p>Vidéos</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <i class="fas fa-users fa-2x mb-3"></i>
+                                    <h3 id="categoryCount">0</h3>
+                                    <p>Catégories</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <i class="fas fa-clock fa-2x mb-3"></i>
+                                    <h3 id="pendingCount">0</h3>
+                                    <p>En attente</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation par catégories -->
+    <section id="bibliotheque">
+        <div class="container">
+            <div class="categories-nav text-center">
+                <h4><i class="fas fa-book"></i> Bibliothèque</h4>
+                <p class="text-muted">Découvrez toutes nos vidéos approuvées</p>
+                <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#libraryModal">
+                    <i class="fas fa-play-circle me-2"></i>Ouvrir la Bibliothèque
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Formulaire de soumission -->
+    <section id="submit" class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="mb-0">
+                                <i class="fas fa-upload me-2"></i>Soumettre une vidéo
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="uploadForm">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Titre de la vidéo *</label>
+                                    <input type="text" class="form-control" id="title" name="title" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description" rows="6" maxlength="1000" placeholder="Décrivez votre vidéo (maximum 1000 caractères)"></textarea>
+                                    <small class="text-muted char-counter">0/1000 caractères</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="category" class="form-label">Catégorie</label>
+                                    <select class="form-control" id="category" name="category">
+                                        <option value="">Sélectionner une catégorie</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="video" class="form-label">Fichier vidéo</label>
+                                    <input type="file" class="form-control" id="video" name="video" accept="video/*" required>
+                                    <small class="text-muted">Formats acceptés : MP4, AVI, MOV, WMV, FLV, WebM</small>
+                                </div>
+                                
+                                <!-- Section Copyright et Propriété -->
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0 copyright-header"><i class="fas fa-copyright me-2"></i>Droits d'auteur et propriété</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Question 1: Avez-vous enregistré la vidéo ? -->
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">Avez-vous enregistré la vidéo ?</label>
+                                            <div class="btn-group w-100" role="group">
+                                                <input type="radio" class="btn-check" name="recordedVideo" id="recordedYes" value="yes" required>
+                                                <label class="btn btn-outline-primary" for="recordedYes">Oui</label>
+                                                <input type="radio" class="btn-check" name="recordedVideo" id="recordedNo" value="no">
+                                                <label class="btn btn-outline-primary" for="recordedNo">Non</label>
+                                            </div>
+                                            
+                                            <!-- Champ email conditionnel pour l'enregistreur -->
+                                            <div id="recorderEmailSection" class="mt-3" style="display: none;">
+                                                <div class="alert alert-warning">
+                                                    <i class="fas fa-info-circle me-2"></i>
+                                                    <strong>Fournissez les coordonnées de l'enregistreur.</strong> Nous le contacterons bientôt.
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="recorderEmail" class="form-label">Adresse e-mail</label>
+                                                    <input type="email" class="form-control" id="recorderEmail" name="recorderEmail" 
+                                                           placeholder="ex: johndoe@gmail.com">
+                                                    <small class="text-muted">Email de la personne qui a enregistré la vidéo</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Question 2: Possédez-vous les droits d'auteur ? -->
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">Possédez-vous les droits d'auteur ?</label>
+                                            <div class="btn-group w-100" role="group">
+                                                <input type="radio" class="btn-check" name="copyrightOwnership" id="copyrightYes" value="yes" required>
+                                                <label class="btn btn-outline-primary" for="copyrightYes">Oui</label>
+                                                <input type="radio" class="btn-check" name="copyrightOwnership" id="copyrightNo" value="no">
+                                                <label class="btn btn-outline-primary" for="copyrightNo">Non</label>
+                                            </div>
+                                            
+                                            <!-- Champ email conditionnel pour le propriétaire -->
+                                            <div id="ownerEmailSection" class="mt-3" style="display: none;">
+                                                <div class="alert alert-warning">
+                                                    <i class="fas fa-info-circle me-2"></i>
+                                                    <strong>Fournissez les coordonnées du propriétaire.</strong> Nous le contacterons bientôt.
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="ownerEmail" class="form-label">Adresse e-mail</label>
+                                                    <input type="email" class="form-control" id="ownerEmail" name="ownerEmail" 
+                                                           placeholder="ex: johndoe@gmail.com">
+                                                    <small class="text-muted">Email du propriétaire des droits d'auteur</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Boîte d'information -->
+                                        <div class="alert alert-info">
+                                            <div class="d-flex">
+                                                <i class="fas fa-info-circle fa-2x text-info me-3 mt-1"></i>
+                                                <div>
+                                                    <strong>Information importante :</strong><br>
+                                                    En soumettant cette vidéo, <strong>DROLE Media devient le propriétaire des droits d'auteur de la vidéo</strong>. 
+                                                    L'auteur de la vidéo reçoit 50% des bénéfices générés.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Accord des conditions -->
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="termsAgreement" required>
+                                                <label class="form-check-label" for="termsAgreement">
+                                                    J'accepte les <strong><u><a href="#" onclick="openTermsModal()" class="terms-link">Conditions de soumission</a></u></strong> et la <strong><u><a href="#" onclick="openPrivacyModal()" class="terms-link">Politique de confidentialité</a></u></strong> 
+                                                    et certifie par la présente que toutes les informations fournies ci-dessus sont complètes et exactes.
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Signature -->
+                                        <div class="mb-3">
+                                            <label for="signature" class="form-label">Veuillez signer</label>
+                                            <input type="text" class="form-control" id="signature" name="signature" 
+                                                   placeholder="Tapez votre nom complet pour signer" required>
+                                            <small class="text-muted">En tapant votre nom, vous confirmez que toutes les informations sont exactes</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="progress mb-3" style="display: none;">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-upload me-2"></i>Soumettre la vidéo
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Vidéos -->
+    <section id="videos" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">
+                <i class="fas fa-video me-2"></i>Vidéos récentes
+            </h2>
+            <div id="videosContainer">
+                <!-- Les vidéos seront chargées ici -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Connexion/Inscription -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authModalTitle">Se connecter</h5>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Onglets Connexion/Inscription -->
+                    <ul class="nav nav-tabs mb-3" id="authTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#loginTab">Connexion</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#registerTab">Inscription</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <!-- Onglet Connexion -->
+                        <div class="tab-pane fade show active" id="loginTab">
+                            <form id="loginForm">
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="loginEmail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginPassword" class="form-label">Mot de passe</label>
+                                    <input type="password" class="form-control" id="loginPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 mb-3">Se connecter</button>
+                                <div class="text-center">
+                                    <button type="button" class="btn btn-link text-decoration-none" onclick="showForgotPassword()">
+                                        <i class="fas fa-key me-1"></i>Mot de passe oublié ?
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Onglet Inscription -->
+                        <div class="tab-pane fade" id="registerTab">
+                            <form id="registerForm">
+                                <div class="mb-3">
+                                    <label for="registerName" class="form-label">Nom d'utilisateur</label>
+                                    <input type="text" class="form-control" id="registerName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="registerEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="registerEmail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="registerPassword" class="form-label">Mot de passe</label>
+                                    <input type="password" class="form-control" id="registerPassword" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirmer le mot de passe</label>
+                                    <input type="password" class="form-control" id="confirmPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Créer un compte</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Mot de passe oublié -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-key me-2"></i>Récupération de mot de passe
+                    </h5>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="forgotPasswordStep1">
+                        <p class="text-muted mb-4">
+                            Entrez votre adresse email pour recevoir un lien de réinitialisation de mot de passe.
+                        </p>
+                        <form id="forgotPasswordForm">
+                            <div class="mb-3">
+                                <label for="forgotEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="forgotEmail" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-paper-plane me-2"></i>Envoyer le lien
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div id="forgotPasswordStep2" style="display: none;">
+                        <div class="text-center">
+                            <i class="fas fa-envelope-open-text fa-3x text-success mb-3"></i>
+                            <h5 class="text-success">Email envoyé !</h5>
+                            <p class="text-muted">
+                                Un email contenant un lien de réinitialisation a été envoyé à votre adresse email.
+                            </p>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Vérifiez votre boîte de réception et vos spams.
+                            </div>
+                            <button type="button" class="btn btn-secondary" onclick="closeForgotPasswordModal()">
+                                <i class="fas fa-times me-2"></i>Fermer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Panel Admin -->
+    <div class="modal fade" id="adminPanelModal" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Panel d'Administration</h5>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-danger btn-sm me-2" id="logoutBtnAdmin">
+                            <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="adminTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#pendingVideos">Vidéos en attente</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#approvedVideos">Vidéos approuvées</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#categories">Gestion des catégories</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#partners">Gestion des partenaires</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#users">Gestion des utilisateurs</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3">
+                        <div class="tab-pane fade show active" id="pendingVideos">
+                            <div id="pendingVideosContainer">
+                                <!-- Vidéos en attente -->
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="approvedVideos">
+                            <div class="mb-3 d-flex justify-content-between align-items-center">
+                                <h6><i class="fas fa-check-circle me-2 text-success"></i>Vidéos Approuvées</h6>
+                                <div class="input-group" style="max-width: 300px;">
+                                    <input type="text" class="form-control" id="searchApproved" placeholder="Rechercher une vidéo...">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="searchApprovedVideos()">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Ici vous pouvez voir toutes les vidéos qui ont été approuvées et sont visibles publiquement. Vous pouvez les supprimer si nécessaire.
+                                </small>
+                            </div>
+                            
+                            <!-- Filtres par catégorie pour admin -->
+                            <div class="mb-3">
+                                <div class="d-flex flex-wrap align-items-center">
+                                    <small class="text-muted me-2">Filtrer par catégorie:</small>
+                                    <div id="adminCategoryFilters">
+                                        <!-- Les filtres seront générés dynamiquement -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="approvedVideosContainer">
+                                <!-- Vidéos approuvées -->
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="categories">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="fas fa-plus me-2"></i>Ajouter une catégorie</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <form id="addCategoryForm">
+                                                <div class="mb-3">
+                                                    <label for="newCategoryName" class="form-label">Nom de la catégorie</label>
+                                                    <input type="text" class="form-control" id="newCategoryName" placeholder="Ex: Humour, Sport, Musique..." required>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-plus me-1"></i>Ajouter
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="fas fa-tags me-2"></i>Catégories existantes</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="categoriesList">
+                                                <!-- Liste des catégories -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="partners">
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <h6><i class="fas fa-handshake me-2"></i>Gestion des Partenaires</h6>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-primary btn-sm" onclick="addNewPartner()">
+                                        <i class="fas fa-plus me-1"></i>Ajouter un partenaire
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3" id="adminPartnersContainer">
+                                <!-- Les partenaires avec options d'admin seront affichés ici -->
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="users">
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <h6><i class="fas fa-users me-2"></i>Gestion des Utilisateurs</h6>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="userSearch" placeholder="Rechercher un utilisateur...">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="searchUsers()">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3" id="adminUsersContainer">
+                                <!-- Les utilisateurs avec options d'admin seront affichés ici -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Dashboard Utilisateur -->
+    <div class="modal fade" id="userDashboardModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Mon Dashboard</h5>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-danger btn-sm me-2" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    
+                    <ul class="nav nav-tabs mb-3" id="userDashboardTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#myVideos">Mes Vidéos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#payment">Paiement</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <!-- Onglet Mes Vidéos -->
+                        <div class="tab-pane fade show active" id="myVideos">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5 class="text-success" id="approvedCount">0</h5>
+                                            <small>Approuvées</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5 class="text-warning" id="pendingUserCount">0</h5>
+                                            <small>En attente</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5 class="text-danger" id="rejectedCount">0</h5>
+                                            <small>Rejetées</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5 class="text-info" id="totalUserVideos">0</h5>
+                                            <small>Total</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="userVideosContainer">
+                                <!-- Les vidéos de l'utilisateur seront affichées ici -->
+                            </div>
+                        </div>
+                        
+                        <!-- Onglet Paiement -->
+                        <div class="tab-pane fade" id="payment">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Informations de paiement</strong><br>
+                                        Configurez vos informations de paiement pour recevoir vos gains. Vos données sont sécurisées et ne seront utilisées que pour les paiements.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <form id="paymentForm">
+                                <!-- Informations personnelles -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h6 class="mb-3">
+                                            <i class="fas fa-user me-2"></i>
+                                            Informations personnelles
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="fullName" class="form-label">
+                                                <i class="fas fa-user me-1"></i>
+                                                Nom complet
+                                            </label>
+                                            <input type="text" class="form-control" id="fullName" name="fullName" 
+                                                   placeholder="Jean Dupont">
+                                            <small class="text-muted">Votre nom complet pour les documents fiscaux</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="taxId" class="form-label">
+                                                <i class="fas fa-id-card me-1"></i>
+                                                Numéro fiscal (optionnel)
+                                            </label>
+                                            <input type="text" class="form-control" id="taxId" name="taxId" 
+                                                   placeholder="123456789">
+                                            <small class="text-muted">Numéro fiscal pour les déclarations (optionnel)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Méthode de paiement -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h6 class="mb-3">
+                                            <i class="fas fa-credit-card me-2"></i>
+                                            Méthode de paiement préférée
+                                        </h6>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="paypalMethod" value="paypal" checked>
+                                            <label class="form-check-label" for="paypalMethod">
+                                                <i class="fab fa-paypal me-1"></i>PayPal
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="ibanMethod" value="iban">
+                                            <label class="form-check-label" for="ibanMethod">
+                                                <i class="fas fa-university me-1"></i>Virement bancaire
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="cryptoMethod" value="crypto">
+                                            <label class="form-check-label" for="cryptoMethod">
+                                                <i class="fab fa-bitcoin me-1"></i>Cryptomonnaie
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Section PayPal -->
+                                <div id="paypalSection" class="payment-section">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="paypalEmail" class="form-label">
+                                                    <i class="fab fa-paypal me-1"></i>
+                                                    Adresse email PayPal
+                                                </label>
+                                                <input type="email" class="form-control" id="paypalEmail" name="paypalEmail" 
+                                                       placeholder="votre-email@paypal.com">
+                                                <small class="text-muted">L'adresse email associée à votre compte PayPal</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Virement bancaire -->
+                                <div id="ibanSection" class="payment-section" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="ibanNumber" class="form-label">
+                                                    <i class="fas fa-university me-1"></i>
+                                                    Numéro IBAN
+                                                </label>
+                                                <input type="text" class="form-control" id="ibanNumber" name="ibanNumber" 
+                                                       placeholder="FR76 1234 5678 9012 3456 7890 123">
+                                                <small class="text-muted">Votre numéro IBAN complet</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="bankName" class="form-label">
+                                                    <i class="fas fa-building me-1"></i>
+                                                    Nom de la banque
+                                                </label>
+                                                <input type="text" class="form-control" id="bankName" name="bankName" 
+                                                       placeholder="Banque Populaire">
+                                                <small class="text-muted">Nom de votre banque</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="accountHolder" class="form-label">
+                                                    <i class="fas fa-user me-1"></i>
+                                                    Titulaire du compte
+                                                </label>
+                                                <input type="text" class="form-control" id="accountHolder" name="accountHolder" 
+                                                       placeholder="Jean Dupont">
+                                                <small class="text-muted">Nom complet du titulaire du compte</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="bicCode" class="form-label">
+                                                    <i class="fas fa-code me-1"></i>
+                                                    Code BIC/SWIFT
+                                                </label>
+                                                <input type="text" class="form-control" id="bicCode" name="bicCode" 
+                                                       placeholder="BNPAFRPP">
+                                                <small class="text-muted">Code BIC/SWIFT de votre banque (optionnel)</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Section Cryptomonnaie -->
+                                <div id="cryptoSection" class="payment-section" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="cryptoType" class="form-label">
+                                                    <i class="fab fa-bitcoin me-1"></i>
+                                                    Type de cryptomonnaie
+                                                </label>
+                                                <select class="form-select" id="cryptoType" name="cryptoType">
+                                                    <option value="btc">Bitcoin (BTC)</option>
+                                                    <option value="eth">Ethereum (ETH)</option>
+                                                    <option value="sol">Solana (SOL)</option>
+                                                    <option value="usdt">Tether (USDT)</option>
+                                                    <option value="usdc">USD Coin (USDC)</option>
+                                                </select>
+                                                <small class="text-muted">Sélectionnez votre cryptomonnaie préférée</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="cryptoAddress" class="form-label">
+                                                    <i class="fas fa-wallet me-1"></i>
+                                                    Adresse du wallet
+                                                </label>
+                                                <input type="text" class="form-control" id="cryptoAddress" name="cryptoAddress" 
+                                                       placeholder="1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa">
+                                                <small class="text-muted">Votre adresse de wallet pour recevoir les paiements</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Boutons d'action -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-1"></i>
+                                            Sauvegarder les informations
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Bibliothèque -->
+    <div class="modal fade" id="libraryModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-book me-2"></i>Bibliothèque de Vidéos
+                    </h5>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Barre de recherche -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mx-auto">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="librarySearch" placeholder="Rechercher une vidéo...">
+                                <button class="btn btn-outline-secondary" type="button" onclick="searchLibraryVideos()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtres par catégorie -->
+                    <div class="row mb-4">
+                        <div class="col-12 text-center">
+                            <div class="category-filters" id="libraryCategoryFilters">
+                                <!-- Les filtres seront générés dynamiquement -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Statistiques -->
+                    <div class="row mb-3">
+                        <div class="col-12 text-center">
+                            <span class="badge bg-primary fs-6">
+                                <i class="fas fa-video me-1"></i>
+                                <span id="libraryVideoCount">0</span> vidéo(s) disponible(s)
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Grille de vidéos -->
+                    <div class="container-fluid">
+                        <div class="row g-3" id="libraryContainer">
+                            <!-- Les vidéos seront affichées ici -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Contact -->
+    <div class="modal fade" id="contactModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-envelope me-2"></i>Contactez-nous
+                    </h5>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-info-circle me-2"></i>Informations de contact</h6>
+                            <div class="contact-info">
+                                <p><i class="fas fa-envelope me-2"></i><strong>Email :</strong> contact@drolemedia.com</p>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h6><i class="fas fa-share-alt me-2"></i>Suivez-nous</h6>
+                                <div class="social-links">
+                                    <a href="#" class="btn btn-outline-danger btn-sm me-2">
+                                        <i class="fab fa-instagram"></i> Instagram
+                                    </a>
+                                    <a href="#" class="btn btn-outline-dark btn-sm">
+                                        <i class="fab fa-tiktok"></i> TikTok
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-paper-plane me-2"></i>Envoyez-nous un message</h6>
+                            <form id="contactForm">
+                                <div class="mb-3">
+                                    <label for="contactName" class="form-label">Nom complet *</label>
+                                    <input type="text" class="form-control" id="contactName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="contactEmail" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="contactEmail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="contactSubject" class="form-label">Sujet *</label>
+                                    <select class="form-control" id="contactSubject" required>
+                                        <option value="">Sélectionner un sujet</option>
+                                        <option value="support">Support technique</option>
+                                        <option value="partnership">Partenariat</option>
+                                        <option value="suggestion">Suggestion</option>
+                                        <option value="bug">Signalement de bug</option>
+                                        <option value="other">Autre</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="contactMessage" class="form-label">Message *</label>
+                                    <textarea class="form-control" id="contactMessage" rows="4" maxlength="500" placeholder="Votre message (maximum 500 caractères)" required></textarea>
+                                    <small class="text-muted contact-char-counter">0/500 caractères</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-paper-plane me-2"></i>Envoyer le message
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Partenaires -->
+    <div class="modal fade" id="partnersModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-handshake me-2"></i>Nos Partenaires
+                    </h5>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Section publique des partenaires -->
+                    <div id="publicPartnersSection">
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h6><i class="fas fa-star me-2"></i>Partenaires Officiels</h6>
+                                <p class="text-muted">Découvrez nos partenaires qui nous soutiennent</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3" id="partnersContainer">
+                            <!-- Les partenaires seront affichés ici -->
+                        </div>
+                    </div>
+                    
+                    <!-- Section admin pour gérer les partenaires (visible uniquement pour les admins) -->
+                    <div id="adminPartnersSection" style="display: none;">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <h6><i class="fas fa-cog me-2"></i>Gestion des Partenaires</h6>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPartnerModal">
+                                    <i class="fas fa-plus me-1"></i>Ajouter un partenaire
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3" id="adminPartnersContainer">
+                            <!-- Les partenaires avec options d'admin seront affichés ici -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajouter/Éditer Partenaire (Admin) -->
+    <div class="modal fade" id="addPartnerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="partnerModalTitle">
+                        <i class="fas fa-plus me-2"></i>Ajouter un Partenaire
+                    </h5>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="partnerForm">
+                        <input type="hidden" id="partnerId" name="partnerId">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="partnerName" class="form-label">Nom du partenaire *</label>
+                                    <input type="text" class="form-control" id="partnerName" name="partnerName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="partnerUsername" class="form-label">@ du partenaire *</label>
+                                    <input type="text" class="form-control" id="partnerUsername" name="partnerUsername" placeholder="@username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="partnerEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="partnerEmail" name="partnerEmail">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="partnerWebsite" class="form-label">Site web</label>
+                                    <input type="url" class="form-control" id="partnerWebsite" name="partnerWebsite" placeholder="https://...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="partnerProfileImage" class="form-label">Photo de profil</label>
+                                    <input type="file" class="form-control" id="partnerProfileImage" name="partnerProfileImage" accept="image/*">
+                                    <small class="text-muted">Formats acceptés : JPG, PNG, GIF (max 5MB)</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="partnerDescription" class="form-label">Description</label>
+                                    <textarea class="form-control" id="partnerDescription" name="partnerDescription" rows="3" maxlength="200" placeholder="Description courte du partenaire"></textarea>
+                                    <small class="text-muted partner-char-counter">0/200 caractères</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2025 DROLE Media. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Modal Conditions de soumission -->
+    <div class="modal fade" id="termsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-contract me-2"></i>Conditions de soumission
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="termsContent">
+                        <p class="text-muted text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Le contenu des conditions de soumission sera ajouté prochainement.
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Politique de confidentialité -->
+    <div class="modal fade" id="privacyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-shield-alt me-2"></i>Politique de confidentialité
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="privacyContent">
+                        <p class="text-muted text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Le contenu de la politique de confidentialité sera ajouté prochainement.
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=1.2"></script>
+</body>
+</html> 
