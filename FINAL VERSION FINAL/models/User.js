@@ -41,6 +41,20 @@ const userSchema = new mongoose.Schema({
     resetPasswordExpires: {
         type: Date
     },
+    // Champs pour la vérification par email
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailVerificationToken: {
+        type: String
+    },
+    emailVerificationExpires: {
+        type: Date
+    },
+    lastVerificationEmailSent: {
+        type: Date
+    },
     // Informations de paiement
     paymentInfo: {
         paymentMethod: {

@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Video = require('../models/Video');
 const Admin = require('../models/Admin');
+const Category = require('../models/Category');
 
 // Middleware d'auth admin (simplifié)
 function authAdmin(req, res, next) {
@@ -19,7 +20,7 @@ function authAdmin(req, res, next) {
   }
   
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'drole_media_secret_key_2025');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log('✅ Token décodé avec succès');
     
     if (decoded.isAdmin === true) {
@@ -43,7 +44,7 @@ router.post('/login', async (req, res) => {
   if (!admin) return res.status(401).json({ error: 'Identifiants invalides' });
   const valid = await bcrypt.compare(password, admin.password);
   if (!valid) return res.status(401).json({ error: 'Identifiants invalides' });
-  const token = jwt.sign({ id: admin._id, username: admin.username, isAdmin: true }, process.env.JWT_SECRET || 'drole_media_secret_key_2025', { expiresIn: '1d' });
+  const token = jwt.sign({ id: admin._id, username: admin.username, isAdmin: true }, process.env.JWT_SECRET, { expiresIn: '1d' });
   res.json({ token });
 });
 
@@ -52,10 +53,18 @@ router.get('/videos', authAdmin, async (req, res) => {
   try {
     const videos = await Video.find({ status: 'pending' })
       .populate('category')
-      .populate('user', 'name email');
+      .populate('user', 'name email isBanned');
+    
+    // Filtrer les vidéos des utilisateurs bannis
+    const filteredVideos = videos.filter(video => {
+      if (!video.user || video.user.isBanned) {
+        return false;
+      }
+      return true;
+    });
     
     // Ajouter des valeurs par défaut pour les vidéos existantes qui n'ont pas les nouveaux champs
-    const videosWithDefaults = videos.map(video => {
+    const videosWithDefaults = filteredVideos.map(video => {
       const videoObj = video.toObject();
       return {
         ...videoObj,
@@ -66,49 +75,7 @@ router.get('/videos', authAdmin, async (req, res) => {
       };
     });
     
-    console.log('📹 Vidéos avec valeurs par défaut:', videosWithDefaults.map(v => ({
-      title: v.title,
-      recordedVideo: v.recordedVideo,
-      copyrightOwnership: v.copyrightOwnership,
-      signature: v.signature
-    })));
-    
-    // Debug: Afficher les données brutes de la base de données
-    console.log('🔍 Données brutes de la base de données:');
-    videos.forEach((video, index) => {
-      console.log(`📹 Vidéo ${index + 1} (brute):`, {
-        title: video.title,
-        recordedVideo: video.recordedVideo,
-        copyrightOwnership: video.copyrightOwnership,
-        termsAgreement: video.termsAgreement,
-        signature: video.signature,
-        user: video.user,
-        userId: video.user?._id,
-        userName: video.user?.name,
-        userEmail: video.user?.email,
-        hasRecordedVideo: video.hasOwnProperty('recordedVideo'),
-        hasCopyrightOwnership: video.hasOwnProperty('copyrightOwnership'),
-        // Debug complet de l'objet user
-        userObject: JSON.stringify(video.user, null, 2)
-      });
-    });
-    
-    // Debug: Vérifier les utilisateurs dans la base de données
-    const User = require('../models/User');
-    const userIds = videos.map(v => v.user).filter(id => id);
-    console.log('🔍 IDs utilisateurs trouvés:', userIds);
-    
-    if (userIds.length > 0) {
-      const users = await User.find({ _id: { $in: userIds } });
-      console.log('🔍 Utilisateurs trouvés dans la DB:', users.map(u => ({ id: u._id, name: u.name, email: u.email })));
-      
-      // Debug: Vérifier chaque utilisateur individuellement
-      for (const userId of userIds) {
-        const user = await User.findById(userId);
-        console.log(`🔍 Utilisateur ${userId}:`, user ? { id: user._id, name: user.name, email: user.email } : 'Non trouvé');
-      }
-    }
-    
+    console.log(`📹 Vidéos en attente: ${videos.length} total, ${videosWithDefaults.length} visibles (utilisateurs non bannis)`);
     res.json(videosWithDefaults);
   } catch (err) {
     console.error('❌ Erreur récupération vidéos:', err);
@@ -121,12 +88,23 @@ router.get('/videos/approved', authAdmin, async (req, res) => {
   try {
     const videos = await Video.find({ status: 'validated' })
       .populate('category')
-      .populate('user', 'name email')
+      .populate('user', 'name email isBanned')
       .sort({ validatedAt: -1, submittedAt: -1 });
     
-    // Ajouter des valeurs par défaut pour les vidéos existantes qui n'ont pas les nouveaux champs
-    const videosWithDefaults = videos.map(video => {
+    // Filtrer les vidéos des utilisateurs bannis
+    const filteredVideos = videos.filter(video => {
+      if (!video.user || video.user.isBanned) {
+        return false;
+      }
+      return true;
+    });
+    
+    // Conserver les URLs Cloudinary et locales telles quelles
+    const correctedVideos = filteredVideos.map(video => {
       const videoObj = video.toObject();
+      console.log('🔍 URL vidéo dans /api/admin/videos/approved:', videoObj.s3Url);
+      
+      // Ajouter des valeurs par défaut pour les vidéos existantes qui n'ont pas les nouveaux champs
       return {
         ...videoObj,
         recordedVideo: videoObj.recordedVideo || 'no',
@@ -136,10 +114,112 @@ router.get('/videos/approved', authAdmin, async (req, res) => {
       };
     });
     
-    res.json(videosWithDefaults);
+    console.log(`📹 Vidéos approuvées: ${videos.length} total, ${correctedVideos.length} visibles (utilisateurs non bannis)`);
+    res.json(correctedVideos);
   } catch (err) {
     console.error('Erreur lors de la récupération des vidéos approuvées:', err);
     res.status(500).json({ error: 'Erreur lors de la récupération des vidéos approuvées.' });
+  }
+});
+
+// POST /api/admin/videos/cleanup : nettoyer les anciennes vidéos
+router.post('/videos/cleanup', authAdmin, async (req, res) => {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Lire les fichiers réellement présents dans le dossier uploads
+    const uploadsDir = path.join(__dirname, '..', 'uploads');
+    let existingFiles = [];
+    
+    try {
+      existingFiles = fs.readdirSync(uploadsDir)
+        .filter(file => file.endsWith('.mp4'))
+        .map(file => `/uploads/${file}`);
+    } catch (error) {
+      console.log('Dossier uploads non trouvé ou vide');
+    }
+    
+    console.log('📁 Fichiers présents dans uploads:', existingFiles);
+    
+    // Récupérer toutes les vidéos de la base de données
+    const allVideos = await Video.find({});
+    const videosToDelete = [];
+    
+    allVideos.forEach(video => {
+      // Extraire le nom du fichier de s3Url
+      const s3Url = video.s3Url || '';
+      const filename = s3Url.replace('/uploads/', '');
+      
+      // Vérifier si le fichier existe réellement
+      if (s3Url && s3Url.startsWith('/uploads/') && !existingFiles.includes(s3Url)) {
+        videosToDelete.push(video._id);
+        console.log(`❌ Vidéo à supprimer: ${video.title} (${s3Url}) - fichier manquant`);
+      }
+    });
+    
+    if (videosToDelete.length > 0) {
+      await Video.deleteMany({ _id: { $in: videosToDelete } });
+      console.log(`🗑️ ${videosToDelete.length} vidéos supprimées (fichiers manquants)`);
+      res.json({ 
+        message: `${videosToDelete.length} vidéos supprimées (fichiers manquants)`,
+        deletedCount: videosToDelete.length,
+        existingFiles: existingFiles
+      });
+    } else {
+      res.json({ 
+        message: 'Toutes les vidéos ont leurs fichiers correspondants',
+        deletedCount: 0,
+        existingFiles: existingFiles
+      });
+    }
+  } catch (error) {
+    console.error('Erreur lors du nettoyage des vidéos:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// POST /api/admin/videos/cleanup-all : nettoyer toutes les vidéos (nettoyage complet)
+router.post('/videos/cleanup-all', authAdmin, async (req, res) => {
+  try {
+    console.log('🧹 Début du nettoyage complet de la base de données...');
+    
+    // Supprimer toutes les vidéos de la base de données
+    const result = await Video.deleteMany({});
+    
+    console.log(`🗑️ ${result.deletedCount} vidéos supprimées de la base de données`);
+    
+    res.json({ 
+      message: `Nettoyage complet terminé. ${result.deletedCount} vidéos supprimées de la base de données.`,
+      deletedCount: result.deletedCount,
+      status: 'success'
+    });
+  } catch (error) {
+    console.error('Erreur lors du nettoyage complet:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// POST /api/admin/videos/keep-only-test1 : garder seulement "test1"
+router.post('/videos/keep-only-test1', authAdmin, async (req, res) => {
+  try {
+    console.log('🧹 Début du nettoyage - garder seulement "test1"...');
+    
+    // Supprimer toutes les vidéos sauf celles avec le titre "test1"
+    const result = await Video.deleteMany({ 
+      title: { $ne: 'test1' } 
+    });
+    
+    console.log(`🗑️ ${result.deletedCount} vidéos supprimées (gardé seulement "test1")`);
+    
+    res.json({ 
+      message: `Nettoyage terminé. ${result.deletedCount} vidéos supprimées. Seule "test1" reste.`,
+      deletedCount: result.deletedCount,
+      status: 'success'
+    });
+  } catch (error) {
+    console.error('Erreur lors du nettoyage:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -342,6 +422,47 @@ router.patch('/users/:userId/ban', authAdmin, async (req, res) => {
   }
 });
 
+// Supprimer un utilisateur (admin seulement)
+router.delete('/users/:userId', authAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    console.log('🗑️ Tentative de suppression utilisateur:', userId);
+    
+    const User = require('../models/User');
+    const Video = require('../models/Video');
+    
+    // Trouver l'utilisateur à supprimer
+    const userToDelete = await User.findById(userId);
+    if (!userToDelete) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+    
+    // Empêcher l'admin de se supprimer lui-même
+    if (userToDelete.isAdmin) {
+      return res.status(400).json({ error: 'Vous ne pouvez pas supprimer un compte administrateur.' });
+    }
+    
+    console.log(`🗑️ Suppression de l'utilisateur: ${userToDelete.name} (${userToDelete.email})`);
+    
+    // Supprimer toutes les vidéos de l'utilisateur
+    const deletedVideos = await Video.deleteMany({ user: userId });
+    console.log(`📹 ${deletedVideos.deletedCount} vidéos supprimées pour l'utilisateur ${userToDelete.email}`);
+    
+    // Supprimer l'utilisateur
+    await User.findByIdAndDelete(userId);
+    console.log(`✅ Utilisateur ${userToDelete.email} supprimé avec succès`);
+    
+    res.json({
+      message: `Utilisateur "${userToDelete.name}" supprimé avec succès. ${deletedVideos.deletedCount} vidéo(s) supprimée(s).`,
+      deletedVideosCount: deletedVideos.deletedCount
+    });
+  } catch (error) {
+    console.error('❌ Erreur suppression utilisateur:', error);
+    res.status(500).json({ error: 'Erreur interne du serveur' });
+  }
+});
+
 // POST /api/admin/contact : formulaire de contact (public)
 router.post('/contact', async (req, res) => {
   try {
@@ -364,10 +485,96 @@ router.post('/contact', async (req, res) => {
       });
     }
     
-    // Ici vous pourriez ajouter l'envoi d'email avec nodemailer
-    // Pour l'instant, on simule juste la réception
+    // Envoi d'email avec nodemailer
+    const nodemailer = require('nodemailer');
     
-    console.log('✅ Message de contact reçu:');
+    console.log('📧 Configuration de Nodemailer...');
+    console.log('  - EMAIL_USER:', process.env.EMAIL_USER ? 'Configuré' : 'Non configuré');
+    console.log('  - EMAIL_PASS:', process.env.EMAIL_PASS ? 'Configuré' : 'Non configuré');
+    
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      },
+      tls: {
+        rejectUnauthorized: false
+      },
+      debug: true,
+      logger: true
+    });
+    
+    // Vérifier la connexion
+    console.log('🔍 Vérification de la connexion SMTP...');
+    try {
+      await transporter.verify();
+      console.log('✅ Connexion SMTP vérifiée avec succès');
+    } catch (verifyError) {
+      console.error('❌ Erreur de vérification SMTP:', verifyError);
+      throw new Error(`Erreur de vérification SMTP: ${verifyError.message}`);
+    }
+    
+    // Préparer l'email
+    const mailOptions = {
+      from: `"DROLE MEDIA" <${process.env.EMAIL_USER}>`,
+      to: 'u0072585458@gmail.com', // Email de destination
+      subject: `[DROLE MEDIA] Contact - ${subject}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0;">DROLE MEDIA</h1>
+            <p style="color: white; margin: 10px 0 0 0;">Nouveau message de contact</p>
+          </div>
+          <div style="padding: 30px; background: #f8f9fa;">
+            <h2 style="color: #333; margin-bottom: 20px;">Message de contact reçu</h2>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h3 style="color: #667eea; margin-bottom: 15px;">Informations de l'expéditeur</h3>
+              <p><strong>Nom :</strong> ${name}</p>
+              <p><strong>Email :</strong> ${email}</p>
+              <p><strong>Sujet :</strong> ${subject}</p>
+            </div>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px;">
+              <h3 style="color: #667eea; margin-bottom: 15px;">Message</h3>
+              <p style="line-height: 1.6; color: #333;">${message.replace(/\n/g, '<br>')}</p>
+            </div>
+            
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+            <p style="color: #999; font-size: 12px; text-align: center;">
+              Ce message a été envoyé depuis le formulaire de contact de DROLE MEDIA
+            </p>
+          </div>
+        </div>
+      `,
+      text: `
+        DROLE MEDIA - Nouveau message de contact
+        
+        Informations de l'expéditeur:
+        - Nom: ${name}
+        - Email: ${email}
+        - Sujet: ${subject}
+        
+        Message:
+        ${message}
+        
+        ---
+        Ce message a été envoyé depuis le formulaire de contact de DROLE MEDIA
+      `
+    };
+    
+    console.log('📤 Envoi de l\'email...');
+    console.log('  - De:', mailOptions.from);
+    console.log('  - À:', mailOptions.to);
+    console.log('  - Sujet:', mailOptions.subject);
+    
+    // Envoyer l'email
+    const info = await transporter.sendMail(mailOptions);
+    
+    console.log('✅ Email de contact envoyé avec succès!');
+    console.log('  - Message ID:', info.messageId);
+    console.log('  - Réponse:', info.response);
     console.log('  - Nom:', name);
     console.log('  - Email:', email);
     console.log('  - Sujet:', subject);
@@ -385,6 +592,117 @@ router.post('/contact', async (req, res) => {
       error: 'Erreur lors de l\'envoi du message',
       details: error.message 
     });
+  }
+});
+
+// GET /api/admin/categories : liste des catégories avec statistiques
+router.get('/categories', authAdmin, async (req, res) => {
+  try {
+    const categories = await Category.find({});
+    const categoriesWithStats = [];
+    
+    for (const category of categories) {
+      const videoCount = await Video.countDocuments({ category: category._id });
+      categoriesWithStats.push({
+        ...category.toObject(),
+        videoCount: videoCount
+      });
+    }
+    
+    res.json(categoriesWithStats);
+  } catch (err) {
+    console.error('❌ Erreur lors de la récupération des catégories:', err);
+    res.status(500).json({ error: 'Erreur lors de la récupération des catégories.' });
+  }
+});
+
+// POST /api/admin/categories : ajout catégorie
+router.post('/categories', authAdmin, async (req, res) => {
+  try {
+    const { name } = req.body;
+    const category = new Category({ name });
+    await category.save();
+    res.status(201).json(category);
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur lors de la création de la catégorie.' });
+  }
+});
+
+// PUT /api/admin/categories/:id : modification catégorie
+router.put('/categories/:id', authAdmin, async (req, res) => {
+  try {
+    const { name } = req.body;
+    
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ error: 'Le nom de la catégorie est requis.' });
+    }
+    
+    // Vérifier si des vidéos utilisent cette catégorie
+    const videosUsingCategory = await Video.find({ category: req.params.id });
+    console.log(`📹 ${videosUsingCategory.length} vidéo(s) utilisent cette catégorie`);
+    
+    // Mettre à jour la catégorie
+    const updatedCategory = await Category.findByIdAndUpdate(
+      req.params.id,
+      { name: name.trim() },
+      { new: true }
+    );
+    
+    if (!updatedCategory) {
+      return res.status(404).json({ error: 'Catégorie non trouvée.' });
+    }
+    
+    // Les vidéos qui utilisent cette catégorie seront automatiquement mises à jour
+    // car elles référencent l'ID de la catégorie, pas le nom
+    // Le nom sera mis à jour lors du populate dans les requêtes
+    
+    const message = videosUsingCategory.length > 0 
+      ? `Catégorie modifiée avec succès. ${videosUsingCategory.length} vidéo(s) utilisent cette catégorie et seront mises à jour automatiquement.`
+      : 'Catégorie modifiée avec succès.';
+    
+    res.json({ 
+      message: message,
+      category: updatedCategory,
+      updatedVideosCount: videosUsingCategory.length
+    });
+  } catch (err) {
+    console.error('❌ Erreur lors de la modification de la catégorie:', err);
+    res.status(500).json({ error: 'Erreur lors de la modification de la catégorie.' });
+  }
+});
+
+// DELETE /api/admin/categories/:id : suppression catégorie
+router.delete('/categories/:id', authAdmin, async (req, res) => {
+  try {
+    // Vérifier si des vidéos utilisent cette catégorie
+    const videosUsingCategory = await Video.find({ category: req.params.id });
+    
+    if (videosUsingCategory.length > 0) {
+      console.log(`⚠️ ${videosUsingCategory.length} vidéo(s) utilisent cette catégorie. Suppression de la catégorie et mise à jour des vidéos...`);
+      
+      // Mettre à jour toutes les vidéos qui utilisent cette catégorie (retirer la catégorie)
+      await Video.updateMany(
+        { category: req.params.id },
+        { $unset: { category: "" } }
+      );
+      
+      console.log(`✅ ${videosUsingCategory.length} vidéo(s) mises à jour (catégorie retirée)`);
+    }
+    
+    // Supprimer la catégorie
+    await Category.findByIdAndDelete(req.params.id);
+    
+    const message = videosUsingCategory.length > 0 
+      ? `Catégorie supprimée avec succès. ${videosUsingCategory.length} vidéo(s) ont été mises à jour (catégorie retirée).`
+      : 'Catégorie supprimée avec succès.';
+    
+    res.json({ 
+      message: message,
+      updatedVideosCount: videosUsingCategory.length
+    });
+  } catch (err) {
+    console.error('❌ Erreur lors de la suppression de la catégorie:', err);
+    res.status(500).json({ error: 'Erreur lors de la suppression.' });
   }
 });
 

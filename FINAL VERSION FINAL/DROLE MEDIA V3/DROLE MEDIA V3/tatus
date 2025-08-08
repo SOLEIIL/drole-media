@@ -1,0 +1,3 @@
+[33m9b6c362[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31mheroku/master[m[33m, [m[1;31mheroku/HEAD[m[33m)[m Fix: dashboard ne s'ouvre plus automatiquement après connexion
+[33m007092c[m Fix notification close button: use proper event listeners and flexbox layout
+[33m3e353e2[m Fix notification close button click functionality

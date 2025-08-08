@@ -3,18 +3,18 @@ const router = express.Router();
 const Partner = require('../models/Partner');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
 const path = require('path');
 
-// Configuration Multer pour l'upload d'images
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/partners/');
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'partner-' + uniqueSuffix + path.extname(file.originalname));
-    }
+// Configuration Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'demo',
+  api_key: process.env.CLOUDINARY_API_KEY || 'demo',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'demo'
 });
+
+// Configuration Multer pour l'upload temporaire vers Cloudinary
+const storage = multer.memoryStorage();
 
 const upload = multer({
     storage: storage,
@@ -23,8 +23,8 @@ const upload = multer({
     },
     fileFilter: function (req, file, cb) {
         const allowedTypes = /jpeg|jpg|png|gif/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
+        const extname = allowedTypes.test(file.originalname.toLowerCase());
+        const mimetype = file.mimetype.startsWith('image/');
         
         if (mimetype && extname) {
             return cb(null, true);
@@ -41,7 +41,7 @@ const optionalAuth = (req, res, next) => {
     
     if (token) {
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'drole_media_secret_key_2025');
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
             if (decoded.isAdmin === true) {
                 req.user = decoded;
                 console.log('✅ Utilisateur admin détecté');
@@ -98,8 +98,61 @@ router.post('/upload-image', optionalAuth, authenticateAdmin, upload.single('pro
             return res.status(400).json({ message: 'Aucun fichier uploadé' });
         }
         
-        const imageUrl = `/uploads/partners/${req.file.filename}`;
-        console.log('✅ Image uploadée avec succès:', imageUrl);
+        // Vérifier si Cloudinary est configuré correctement
+        const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+        const apiKey = process.env.CLOUDINARY_API_KEY;
+        const apiSecret = process.env.CLOUDINARY_API_SECRET;
+        
+        if (!cloudName || cloudName === 'demo' || !apiKey || apiKey === 'demo' || !apiSecret || apiSecret === 'demo') {
+            console.log('⚠️ Cloudinary non configuré, utilisation du stockage local temporaire');
+            
+            // Stockage local temporaire
+            const fs = require('fs');
+            const uploadsDir = path.join(__dirname, '..', 'uploads', 'partners');
+            
+            // Créer le dossier s'il n'existe pas
+            if (!fs.existsSync(uploadsDir)) {
+                fs.mkdirSync(uploadsDir, { recursive: true });
+            }
+            
+            const filename = `partner-${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(req.file.originalname)}`;
+            const filePath = path.join(uploadsDir, filename);
+            
+            fs.writeFileSync(filePath, req.file.buffer);
+            
+            const imageUrl = `/uploads/partners/${filename}`;
+            console.log('✅ Image uploadée localement:', imageUrl);
+            res.json({ imageUrl });
+            return;
+        }
+        
+        // Upload vers Cloudinary
+        console.log('☁️ Upload vers Cloudinary...');
+        const uploadResult = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    resource_type: 'image',
+                    folder: 'drole-media/partners',
+                    public_id: `partner_${Date.now()}`,
+                    overwrite: true
+                },
+                (error, result) => {
+                    if (error) {
+                        console.error('❌ Erreur upload Cloudinary:', error);
+                        reject(error);
+                    } else {
+                        console.log('✅ Upload Cloudinary réussi:', result.secure_url);
+                        resolve(result);
+                    }
+                }
+            );
+            
+            // Stream le fichier vers Cloudinary
+            uploadStream.end(req.file.buffer);
+        });
+        
+        const imageUrl = uploadResult.secure_url;
+        console.log('✅ Image uploadée avec succès vers Cloudinary:', imageUrl);
         res.json({ imageUrl });
     } catch (error) {
         console.error('Erreur lors de l\'upload d\'image:', error);

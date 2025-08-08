@@ -14,7 +14,7 @@ const authenticateToken = (req, res, next) => {
         return res.status(401).json({ error: 'Token d\'accès requis' });
     }
 
-    jwt.verify(token, process.env.JWT_SECRET || 'drole_media_secret_key_2025', (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
             return res.status(403).json({ error: 'Token invalide' });
         }
@@ -59,7 +59,7 @@ router.post('/register', async (req, res) => {
         // Générer un token JWT
         const token = jwt.sign(
             { userId: user._id, email: user.email, isAdmin: user.isAdmin },
-            process.env.JWT_SECRET || 'drole_media_secret_key_2025',
+            process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
 
@@ -73,6 +73,10 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
+
+
+
+
 
 // Connexion d'un utilisateur
 router.post('/login', async (req, res) => {
@@ -95,7 +99,7 @@ router.post('/login', async (req, res) => {
                 // Générer un token JWT
                 const token = jwt.sign(
                     { userId: user._id, email: user.email, isAdmin: user.isAdmin },
-                    process.env.JWT_SECRET || 'drole_media_secret_key_2025',
+                    process.env.JWT_SECRET,
                     { expiresIn: '24h' }
                 );
 
@@ -112,7 +116,7 @@ router.post('/login', async (req, res) => {
         if (admin && admin.password === password) {
             const token = jwt.sign(
                 { adminId: admin._id, username: admin.username, isAdmin: true },
-                process.env.JWT_SECRET || 'drole_media_secret_key_2025',
+                process.env.JWT_SECRET,
                 { expiresIn: '24h' }
             );
 
@@ -134,6 +138,16 @@ router.post('/login', async (req, res) => {
 // Obtenir les vidéos de l'utilisateur connecté
 router.get('/my-videos', authenticateToken, async (req, res) => {
     try {
+        // Vérifier si l'utilisateur est banni
+        const user = await User.findById(req.user.userId);
+        if (!user) {
+            return res.status(404).json({ error: 'Utilisateur non trouvé' });
+        }
+        
+        if (user.isBanned) {
+            return res.status(403).json({ error: 'Votre compte a été banni. Vous ne pouvez plus accéder à vos vidéos.' });
+        }
+
         const videos = await Video.find({ user: req.user.userId })
             .populate('category', 'name')
             .sort({ submittedAt: -1 });
@@ -298,5 +312,7 @@ router.get('/payment-info', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Erreur interne du serveur' });
     }
 });
+
+
 
 module.exports = router;

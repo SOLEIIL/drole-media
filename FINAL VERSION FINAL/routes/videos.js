@@ -3,55 +3,64 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const cloudinary = require('cloudinary').v2;
 const Video = require('../models/Video');
 const Category = require('../models/Category');
 
-// Configuration stockage local (temporaire)
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
+// Configuration Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'demo',
+  api_key: process.env.CLOUDINARY_API_KEY || 'demo',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'demo'
 });
+
+// Configuration stockage temporaire pour Cloudinary
+const storage = multer.memoryStorage();
 
 const upload = multer({ 
   storage: storage,
   fileFilter: function (req, file, cb) {
-    // Temporairement accepter tous les fichiers pour les tests
-    console.log('Fichier reçu:', file.originalname, 'Type:', file.mimetype);
-    cb(null, true);
+    // Accepter les vidéos et images
+    if (file.mimetype.startsWith('video/') || file.mimetype.startsWith('image/')) {
+      console.log('Fichier accepté:', file.originalname, 'Type:', file.mimetype);
+      cb(null, true);
+    } else {
+      console.log('Fichier rejeté:', file.originalname, 'Type:', file.mimetype);
+      cb(new Error('Type de fichier non supporté'), false);
+    }
   },
   limits: {
     fileSize: 100 * 1024 * 1024 // 100MB max
   }
 });
 
-// Middleware optionnel pour extraire l'utilisateur du token (sans forcer l'authentification)
-const optionalAuth = (req, res, next) => {
+// Middleware d'authentification obligatoire pour les vidéos
+const requireAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   
-  if (token) {
-    jwt.verify(token, process.env.JWT_SECRET || 'drole_media_secret_key_2025', (err, user) => {
-      if (!err) {
-        req.user = user;
-      }
-    });
+  if (!token) {
+    return res.status(401).json({ error: 'Token d\'authentification requis' });
   }
-  next();
+  
+      jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(401).json({ error: 'Token invalide' });
+    }
+    req.user = user;
+    next();
+  });
 };
 
-// POST /api/videos/submit : soumission (anonyme ou connecté)
-router.post('/submit', optionalAuth, upload.single('video'), async (req, res) => {
+// POST /api/videos/submit : soumission (authentification obligatoire)
+router.post('/submit', requireAuth, upload.single('video'), async (req, res) => {
   try {
     console.log('Données reçues:', req.body);
     console.log('Fichier reçu:', req.file);
     console.log('Utilisateur:', req.user);
     
-                    // Debug: Afficher les champs de copyright spécifiquement
-                    console.log('🔍 Champs copyright reçus:');
+    // Debug: Afficher les champs de copyright spécifiquement
+    console.log('🔍 Champs copyright reçus:');
     console.log('  - recordedVideo:', req.body.recordedVideo);
     console.log('  - copyrightOwnership:', req.body.copyrightOwnership);
     console.log('  - termsAgreement:', req.body.termsAgreement);
@@ -60,11 +69,12 @@ router.post('/submit', optionalAuth, upload.single('video'), async (req, res) =>
     console.log('  - ownerEmail:', req.body.ownerEmail);
     console.log('  - userEmail:', req.user?.email);
     
-        const { title, description, category, recordedVideo, copyrightOwnership, termsAgreement, signature, recorderEmail, ownerEmail } = req.body;
+    const { title, description, category, recordedVideo, copyrightOwnership, termsAgreement, signature, recorderEmail, ownerEmail } = req.body;
     
     console.log('🔍 Emails extraits:');
     console.log('  - recorderEmail extrait:', recorderEmail);
     console.log('  - ownerEmail extrait:', ownerEmail);
+    
     if (!req.file) return res.status(400).json({ error: 'Aucun fichier vidéo envoyé.' });
     
     // Validation des nouveaux champs (optionnels pour compatibilité)
@@ -72,11 +82,76 @@ router.post('/submit', optionalAuth, upload.single('video'), async (req, res) =>
       console.log('⚠️ Champs copyright manquants, utilisation des valeurs par défaut');
     }
     
-    // Créer l'objet vidéo en gérant le cas où category est vide
+    let videoUrl;
+    let cloudinaryId = null;
+    
+    // Vérifier si Cloudinary est configuré correctement
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    
+    if (!cloudName || cloudName === 'demo' || !apiKey || apiKey === 'demo' || !apiSecret || apiSecret === 'demo') {
+      console.log('⚠️ Cloudinary non configuré, utilisation du stockage local temporaire');
+      
+      // Stockage local temporaire
+      const fs = require('fs');
+      const uploadsDir = path.join(__dirname, '..', 'uploads');
+      
+      // Créer le dossier s'il n'existe pas
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      const filename = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(req.file.originalname)}`;
+      const filePath = path.join(uploadsDir, filename);
+      
+      fs.writeFileSync(filePath, req.file.buffer);
+      
+      videoUrl = `/uploads/${filename}`;
+      console.log('✅ Vidéo uploadée localement:', videoUrl);
+    } else {
+      // Upload vers Cloudinary
+      console.log('☁️ Upload vers Cloudinary...');
+      
+      try {
+        const uploadResult = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              resource_type: 'video',
+              folder: 'drole-media/videos',
+              public_id: `video_${Date.now()}`,
+              overwrite: true
+            },
+            (error, result) => {
+              if (error) {
+                console.error('❌ Erreur upload Cloudinary:', error);
+                reject(error);
+              } else {
+                console.log('✅ Upload Cloudinary réussi:', result.secure_url);
+                resolve(result);
+              }
+            }
+          );
+          
+          // Stream le fichier vers Cloudinary
+          uploadStream.end(req.file.buffer);
+        });
+        
+        videoUrl = uploadResult.secure_url;
+        cloudinaryId = uploadResult.public_id;
+        console.log('✅ Vidéo uploadée vers Cloudinary:', videoUrl);
+      } catch (error) {
+        console.error('❌ Erreur lors de l\'upload Cloudinary:', error);
+        return res.status(500).json({ error: 'Erreur lors de l\'upload vers Cloudinary' });
+      }
+    }
+    
+    // Créer l'objet vidéo
     const videoData = {
       title,
       description,
-      s3Url: `/uploads/${req.file.filename}`, // URL locale temporaire
+      s3Url: videoUrl,
+      cloudinaryId: cloudinaryId,
       status: 'pending'
     };
     
@@ -87,104 +162,34 @@ router.post('/submit', optionalAuth, upload.single('video'), async (req, res) =>
     videoData.signature = signature || 'Non spécifié';
     videoData.recorderEmail = recorderEmail || '';
     videoData.ownerEmail = ownerEmail || '';
-    // Ajouter l'email de l'utilisateur qui soumet la vidéo
     videoData.userEmail = req.user?.email || '';
     
-    console.log('🔍 Emails ajoutés à videoData:');
-    console.log('  - videoData.recorderEmail:', videoData.recorderEmail);
-    console.log('  - videoData.ownerEmail:', videoData.ownerEmail);
-    console.log('  - videoData.userEmail:', videoData.userEmail);
-    
-    console.log('🔍 Emails reçus:');
-    console.log('  - recorderEmail:', recorderEmail);
-    console.log('  - ownerEmail:', ownerEmail);
-    console.log('  - userEmail:', req.user?.email);
-    
-    console.log('📹 Données avant sauvegarde:', videoData);
-    console.log('📹 Vérification des champs individuels:');
-    console.log('  - recordedVideo:', recordedVideo);
-    console.log('  - copyrightOwnership:', copyrightOwnership);
-    console.log('  - termsAgreement:', termsAgreement);
-    console.log('  - signature:', signature);
-    console.log('  - recorderEmail:', recorderEmail);
-    console.log('  - ownerEmail:', ownerEmail);
-    console.log('  - userEmail:', req.user?.email);
-    
-    // Debug: Vérifier si les champs sont bien dans videoData
-    console.log('🔍 Vérification des champs dans videoData:');
-    console.log('  - videoData.recordedVideo:', videoData.recordedVideo);
-    console.log('  - videoData.copyrightOwnership:', videoData.copyrightOwnership);
-    console.log('  - videoData.termsAgreement:', videoData.termsAgreement);
-    console.log('  - videoData.signature:', videoData.signature);
-    console.log('  - videoData.recorderEmail:', videoData.recorderEmail);
-    console.log('  - videoData.ownerEmail:', videoData.ownerEmail);
-    console.log('  - videoData.userEmail:', videoData.userEmail);
-    
-    // Vérifier que tous les champs sont présents
-    console.log('🔍 Vérification finale videoData:');
-    console.log('  - Tous les champs présents:', {
-        title: videoData.title,
-        description: videoData.description,
-        recordedVideo: videoData.recordedVideo,
-        copyrightOwnership: videoData.copyrightOwnership,
-        termsAgreement: videoData.termsAgreement,
-        signature: videoData.signature,
-        recorderEmail: videoData.recorderEmail,
-        ownerEmail: videoData.ownerEmail,
-        userEmail: videoData.userEmail
-    });
-    
-    // Debug: Vérifier les valeurs originales
-    console.log('🔍 Valeurs originales reçues:');
-    console.log('  - recordedVideo (original):', recordedVideo);
-    console.log('  - copyrightOwnership (original):', copyrightOwnership);
-    console.log('  - termsAgreement (original):', termsAgreement);
-    console.log('  - signature (original):', signature);
-    
-    // Debug: Vérifier les valeurs originales
-    console.log('🔍 Valeurs originales reçues:');
-    console.log('  - recordedVideo (original):', recordedVideo);
-    console.log('  - copyrightOwnership (original):', copyrightOwnership);
-    console.log('  - termsAgreement (original):', termsAgreement);
-    console.log('  - signature (original):', signature);
+    console.log('📹 Données vidéo:', videoData);
     
     // Ajouter l'utilisateur s'il est connecté
     if (req.user && req.user.userId) {
       videoData.user = req.user.userId;
     }
     
-    // Ajouter category seulement si elle n'est pas vide
+    // Ajouter la catégorie si spécifiée
     if (category && category.trim() !== '') {
       videoData.category = category;
     }
     
+    // Créer et sauvegarder la vidéo
     const video = new Video(videoData);
     await video.save();
-    console.log('Vidéo sauvegardée:', video);
-    console.log('📹 Vérification des champs copyright:', {
-      recordedVideo: video.recordedVideo,
-      copyrightOwnership: video.copyrightOwnership,
-      termsAgreement: video.termsAgreement,
-      signature: video.signature,
-      recorderEmail: video.recorderEmail,
-      ownerEmail: video.ownerEmail,
-      userEmail: video.userEmail
+    
+    console.log('✅ Vidéo sauvegardée avec succès');
+    res.status(201).json({ 
+      message: 'Vidéo soumise avec succès !', 
+      video: video,
+      videoUrl: videoUrl
     });
     
-    console.log('📹 Vérification des emails sauvegardés:');
-    console.log('  - recorderEmail sauvegardé:', video.recorderEmail);
-    console.log('  - ownerEmail sauvegardé:', video.ownerEmail);
-    console.log('  - userEmail sauvegardé:', video.userEmail);
-    res.status(201).json({ 
-      message: 'Vidéo soumise avec succès, en attente de validation.',
-      isAuthenticated: !!req.user
-    });
-  } catch (err) {
-    console.error('Erreur lors de la soumission:', err);
-    res.status(500).json({ 
-      error: 'Erreur lors de la soumission.',
-      details: err.message 
-    });
+  } catch (error) {
+    console.error('❌ Erreur lors de la soumission:', error);
+    res.status(500).json({ error: 'Erreur serveur lors de la soumission' });
   }
 });
 
@@ -204,8 +209,15 @@ router.get('/', async (req, res) => {
       return true;
     });
     
-    console.log(`📹 Vidéos validées: ${videos.length} total, ${filteredVideos.length} visibles (utilisateurs non bannis)`);
-    res.json(filteredVideos);
+    // Conserver les URLs Cloudinary et locales telles quelles
+    const correctedVideos = filteredVideos.map(video => {
+      const videoObj = video.toObject();
+      console.log('🔍 URL vidéo dans /api/videos:', videoObj.s3Url);
+      return videoObj;
+    });
+    
+    console.log(`📹 Vidéos validées: ${videos.length} total, ${correctedVideos.length} visibles (utilisateurs non bannis)`);
+    res.json(correctedVideos);
   } catch (err) {
     res.status(500).json({ error: 'Erreur lors de la récupération des vidéos.' });
   }
@@ -215,7 +227,7 @@ router.get('/', async (req, res) => {
 router.get('/approved', async (req, res) => {
   try {
     const User = require('../models/User');
-    const videos = await Video.find({ status: 'approved' })
+    const videos = await Video.find({ status: 'validated' })
       .populate('user', 'name email isBanned')
       .populate('category', 'name')
       .sort({ submittedAt: -1 });
@@ -228,8 +240,15 @@ router.get('/approved', async (req, res) => {
       return true;
     });
     
-    console.log(`📹 Vidéos approuvées: ${videos.length} total, ${filteredVideos.length} visibles (utilisateurs non bannis)`);
-    res.json(filteredVideos);
+    // Conserver les URLs Cloudinary et locales telles quelles
+    const correctedVideos = filteredVideos.map(video => {
+      const videoObj = video.toObject();
+      console.log('🔍 URL vidéo dans /api/videos/approved:', videoObj.s3Url);
+      return videoObj;
+    });
+    
+    console.log(`📹 Vidéos approuvées: ${videos.length} total, ${correctedVideos.length} visibles (utilisateurs non bannis)`);
+    res.json(correctedVideos);
   } catch (error) {
     console.error('Erreur lors de la récupération des vidéos approuvées:', error);
     res.status(500).json({ error: 'Erreur interne du serveur' });
@@ -239,18 +258,29 @@ router.get('/approved', async (req, res) => {
 // GET /api/videos/pending : liste publique des vidéos en attente
 router.get('/pending', async (req, res) => {
   try {
+    const User = require('../models/User');
     const videos = await Video.find({ status: 'pending' })
       .populate('category')
-      .populate('user', 'name')
+      .populate('user', 'name email isBanned')
       .sort({ submittedAt: -1 });
-    res.json(videos);
+    
+    // Filtrer les vidéos des utilisateurs bannis
+    const filteredVideos = videos.filter(video => {
+      if (!video.user || video.user.isBanned) {
+        return false;
+      }
+      return true;
+    });
+    
+    console.log(`📹 Vidéos en attente: ${videos.length} total, ${filteredVideos.length} visibles (utilisateurs non bannis)`);
+    res.json(filteredVideos);
   } catch (err) {
     res.status(500).json({ error: 'Erreur lors de la récupération des vidéos en attente.' });
   }
 });
 
 // DELETE /api/videos/:id/cancel : annuler une vidéo (utilisateur seulement)
-router.delete('/:id/cancel', optionalAuth, async (req, res) => {
+router.delete('/:id/cancel', requireAuth, async (req, res) => {
   try {
     const videoId = req.params.id;
     const video = await Video.findById(videoId);
@@ -282,6 +312,52 @@ router.delete('/:id/cancel', optionalAuth, async (req, res) => {
   } catch (err) {
     console.error('❌ Erreur annulation vidéo:', err);
     res.status(500).json({ error: 'Erreur lors de l\'annulation de la vidéo.' });
+  }
+});
+
+// GET /api/videos/stats : statistiques des vidéos (avec filtrage des utilisateurs bannis)
+router.get('/stats', async (req, res) => {
+  try {
+    const User = require('../models/User');
+    
+    // Récupérer toutes les vidéos avec les utilisateurs
+    const allVideos = await Video.find({})
+      .populate('user', 'name email isBanned')
+      .populate('category', 'name');
+    
+    // Filtrer les vidéos des utilisateurs bannis
+    const filteredVideos = allVideos.filter(video => {
+      if (!video.user || video.user.isBanned) {
+        return false;
+      }
+      return true;
+    });
+    
+    // Compter les utilisateurs non bannis
+    const totalUsers = await User.countDocuments({ 
+      $or: [
+        { isBanned: false },
+        { isBanned: { $exists: false } },
+        { isBanned: null }
+      ]
+    });
+    
+    console.log(`👥 Comptage utilisateurs: ${totalUsers} membres actifs`);
+    
+    // Calculer les statistiques
+    const stats = {
+      total: filteredVideos.length,
+      validated: filteredVideos.filter(v => v.status === 'validated').length,
+      pending: filteredVideos.filter(v => v.status === 'pending').length,
+      rejected: filteredVideos.filter(v => v.status === 'rejected').length,
+      members: totalUsers
+    };
+    
+    console.log(`📊 Statistiques calculées: ${filteredVideos.length} vidéos visibles sur ${allVideos.length} total - ${totalUsers} membres`);
+    res.json(stats);
+  } catch (error) {
+    console.error('Erreur lors du calcul des statistiques:', error);
+    res.status(500).json({ error: 'Erreur lors du calcul des statistiques' });
   }
 });
 

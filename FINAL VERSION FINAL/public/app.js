@@ -1,5 +1,5 @@
 // Configuration API
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = window.location.origin + '/api';
 
 // Variables globales
 let adminToken = localStorage.getItem('adminToken');
@@ -14,6 +14,51 @@ let isLoadingData = false;
 let loadingTimeout = null;
 let lastTabSwitch = 0;
 
+// Fonction de notification
+function showNotification(message, type = 'info') {
+    // Créer l'élément de notification
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed d-flex justify-content-between align-items-center`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    
+    // Icône selon le type
+    const icons = {
+        'success': '✅',
+        'error': '❌',
+        'warning': '⚠️',
+        'info': 'ℹ️'
+    };
+    
+    // Créer le contenu du message
+    const messageContent = document.createElement('span');
+    messageContent.textContent = `${icons[type] || icons.info} ${message}`;
+    
+    // Créer le bouton de fermeture
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'btn-close';
+    closeButton.style.cssText = 'background-image: url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\' fill=\'%23000\'%3e%3cpath d=\'M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z\'/%3e%3c/svg%3e"); background-size: 1.5em; background-repeat: no-repeat; background-position: center; width: 1.5em; height: 1.5em; border: 0; opacity: 0.5; cursor: pointer; background-color: transparent; margin-left: 10px;';
+    
+    // Ajouter l'événement de clic
+    closeButton.addEventListener('click', function() {
+        notification.remove();
+    });
+    
+    // Assembler la notification
+    notification.appendChild(messageContent);
+    notification.appendChild(closeButton);
+    
+    // Ajouter au body
+    document.body.appendChild(notification);
+    
+    // Auto-suppression après 5 secondes
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
 
 
 // Vérification des éléments nécessaires
@@ -22,7 +67,7 @@ function checkRequiredElements() {
     
     const requiredElements = [
         'videoCount',
-        'categoryCount', 
+        'membersCount', 
         'pendingCount',
         'videosContainer',
         'libraryContainer'
@@ -158,6 +203,28 @@ function handleTabSwitch(loadFunction, tabName) {
 function setupTabListeners() {
     console.log('🔧 Configuration gestionnaires d\'onglets...');
     
+    // S'assurer qu'un seul onglet est actif à la fois
+    function ensureSingleActiveTab() {
+        const allTabs = document.querySelectorAll('#adminTabs .nav-link');
+        let activeFound = false;
+        
+        allTabs.forEach(tab => {
+            if (tab.classList.contains('active')) {
+                if (activeFound) {
+                    // Si on a déjà trouvé un onglet actif, retirer la classe active
+                    tab.classList.remove('active');
+                } else {
+                    activeFound = true;
+                }
+            }
+        });
+        
+        // Si aucun onglet actif trouvé, activer le premier
+        if (!activeFound && allTabs.length > 0) {
+            allTabs[0].classList.add('active');
+        }
+    }
+    
     // Gestionnaires pour les onglets du panel admin
     const pendingTab = document.querySelector('a[href="#pendingVideos"]');
     const approvedTab = document.querySelector('a[href="#approvedVideos"]');
@@ -165,18 +232,21 @@ function setupTabListeners() {
     
     if (pendingTab) {
         pendingTab.addEventListener('shown.bs.tab', function() {
+            ensureSingleActiveTab();
             handleTabSwitch(() => loadPendingVideos(), 'Vidéos en attente');
         });
     }
     
     if (approvedTab) {
         approvedTab.addEventListener('shown.bs.tab', function() {
+            ensureSingleActiveTab();
             handleTabSwitch(() => loadApprovedVideos(), 'Vidéos approuvées');
         });
     }
     
     if (categoriesTab) {
         categoriesTab.addEventListener('shown.bs.tab', function() {
+            ensureSingleActiveTab();
             handleTabSwitch(() => loadAdminCategories(), 'Catégories');
         });
     }
@@ -184,7 +254,16 @@ function setupTabListeners() {
     const partnersTab = document.querySelector('a[href="#partners"]');
     if (partnersTab) {
         partnersTab.addEventListener('shown.bs.tab', function() {
+            ensureSingleActiveTab();
             handleTabSwitch(() => loadAdminPartners(), 'Partenaires');
+        });
+    }
+    
+    const usersTab = document.querySelector('a[href="#users"]');
+    if (usersTab) {
+        usersTab.addEventListener('shown.bs.tab', function() {
+            ensureSingleActiveTab();
+            handleTabSwitch(() => loadAdminUsers(), 'Utilisateurs');
         });
     }
     
@@ -196,6 +275,9 @@ function setupTabListeners() {
             handleTabSwitch(() => loadUserDashboard(), 'Mes vidéos');
         });
     }
+    
+    // S'assurer qu'un seul onglet est actif au démarrage
+    ensureSingleActiveTab();
     
     console.log('✅ Gestionnaires d\'onglets configurés');
 }
@@ -308,6 +390,36 @@ async function checkAuthStatus() {
     console.log('🔑 adminToken:', adminToken ? 'Présent' : 'Absent');
     console.log('🔑 userToken:', userToken ? 'Présent' : 'Absent');
     
+    // Masquer le lien "Soumettre" par défaut (sera affiché si connecté)
+    const submitLink = document.querySelector('a[href="#submit"]');
+    if (submitLink) {
+        submitLink.style.display = 'none';
+    }
+    
+    // Vérifier les paramètres de vérification dans l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const verification = urlParams.get('verification');
+    
+    if (verification) {
+        switch (verification) {
+            case 'success':
+                showAlert('✅ Votre email a été vérifié avec succès ! Vous pouvez maintenant vous connecter.', 'success');
+                break;
+            case 'expired':
+                showAlert('⚠️ Le lien de vérification a expiré. Veuillez vous inscrire à nouveau.', 'warning');
+                break;
+            case 'invalid':
+                showAlert('❌ Lien de vérification invalide. Veuillez vérifier votre email.', 'danger');
+                break;
+            case 'error':
+                showAlert('❌ Erreur lors de la vérification. Veuillez réessayer.', 'danger');
+                break;
+        }
+        
+        // Nettoyer l'URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
     // Vérifier d'abord le token admin
     if (adminToken) {
         try {
@@ -383,17 +495,25 @@ function updateUIForAuthenticatedUser() {
             showPublicSections();
         }
     }
+    
+    // Afficher le lien "Soumettre" seulement si connecté
+    const submitLink = document.querySelector('a[href="#submit"]');
+    if (submitLink) {
+        submitLink.style.display = 'inline-block';
+    }
 }
 
 // Fonction pour afficher les sections admin dans les modals
 function showAdminSections() {
-    // Section admin des partenaires
+    // Section admin des partenaires - NE PAS AFFICHER dans le modal public
+    // La section admin des partenaires reste uniquement dans le dashboard admin
     const adminPartnersSection = document.getElementById('adminPartnersSection');
     const publicPartnersSection = document.getElementById('publicPartnersSection');
     
     if (adminPartnersSection && publicPartnersSection) {
-        adminPartnersSection.style.display = 'block';
-        publicPartnersSection.style.display = 'none';
+        // Toujours garder la section publique visible
+        adminPartnersSection.style.display = 'none';
+        publicPartnersSection.style.display = 'block';
     }
 }
 
@@ -411,7 +531,7 @@ function showPublicSections() {
 // Connexion d'un utilisateur
 async function loginUser(email, password) {
     try {
-        const response = await fetch(`${API_BASE_URL}/users/login`, {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -433,26 +553,33 @@ async function loginUser(email, password) {
             
             showNotification('Connexion réussie !', 'success');
             
-            // Si c'est un admin, ouvrir le panel admin uniquement
-            setTimeout(() => {
-                if (currentUser.isAdmin) {
-                    // Sauvegarder aussi le token admin pour compatibilité
-                    adminToken = userToken;
-                    localStorage.setItem('adminToken', adminToken);
-                    showAdminPanel();
-                    // Forcer l'affichage des sections admin
-                    showAdminSections();
-                } else {
-                    // Seulement pour les utilisateurs normaux
-                    const dashboardModal = new bootstrap.Modal(document.getElementById('userDashboardModal'));
-                    dashboardModal.show();
-                    loadUserDashboard();
-                    // Forcer l'affichage des sections publiques
-                    showPublicSections();
-                }
-            }, 500);
+            // Masquer le bouton de renvoi d'email
+            hideResendEmailButton();
+            
+            // Sauvegarder le token admin si c'est un admin pour compatibilité
+            if (currentUser.isAdmin) {
+                adminToken = userToken;
+                localStorage.setItem('adminToken', adminToken);
+                // Forcer l'affichage des sections admin
+                showAdminSections();
+            } else {
+                // Forcer l'affichage des sections publiques
+                showPublicSections();
+            }
         } else {
-            showNotification(data.error || 'Erreur de connexion', 'error');
+            if (data.needsVerification) {
+                showAlert(data.message || 'Veuillez vérifier votre email avant de vous connecter. Vérifiez votre boîte de réception.', 'warning');
+                
+                // Afficher le bouton de renvoi d'email seulement si ce n'est pas la première tentative
+                if (!data.firstAttempt) {
+                    showResendEmailButton();
+                } else {
+                    // Pour la première tentative, masquer le bouton de renvoi
+                    hideResendEmailButton();
+                }
+            } else {
+                showAlert(data.message || 'Erreur de connexion', 'danger');
+            }
         }
     } catch (error) {
         console.error('Erreur lors de la connexion:', error);
@@ -460,10 +587,109 @@ async function loginUser(email, password) {
     }
 }
 
+// Variables pour le timer de renvoi d'email
+let resendTimer = null;
+let resendCountdown = 60;
+
+// Fonction pour afficher le bouton de renvoi d'email
+function showResendEmailButton() {
+    const loginModal = document.getElementById('loginModal');
+    const resendSection = loginModal.querySelector('#resendEmailSection');
+    const resendButton = loginModal.querySelector('#resendEmailBtn');
+    const resendTimerSpan = loginModal.querySelector('#resendTimer');
+    
+    if (resendSection) {
+        resendSection.style.display = 'block';
+        resendTimerSpan.textContent = '';
+        resendCountdown = 60;
+        
+        // Démarrer le timer
+        startResendTimer();
+    }
+}
+
+// Fonction pour démarrer le timer de renvoi
+function startResendTimer() {
+    const loginModal = document.getElementById('loginModal');
+    const resendButton = loginModal.querySelector('#resendEmailBtn');
+    const resendTimerSpan = loginModal.querySelector('#resendTimer');
+    
+    if (resendButton) {
+        resendButton.disabled = true;
+        resendCountdown = 60;
+        
+        resendTimer = setInterval(() => {
+            resendCountdown--;
+            resendTimerSpan.textContent = `(${resendCountdown}s)`;
+            
+            if (resendCountdown <= 0) {
+                clearInterval(resendTimer);
+                resendButton.disabled = false;
+                resendTimerSpan.textContent = '';
+            }
+        }, 1000);
+    }
+}
+
+// Fonction pour masquer le bouton de renvoi d'email
+function hideResendEmailButton() {
+    const loginModal = document.getElementById('loginModal');
+    const resendSection = loginModal.querySelector('#resendEmailSection');
+    
+    if (resendSection) {
+        resendSection.style.display = 'none';
+    }
+    
+    // Arrêter le timer s'il est en cours
+    if (resendTimer) {
+        clearInterval(resendTimer);
+        resendTimer = null;
+    }
+}
+
+// Fonction pour renvoyer l'email de vérification
+async function resendVerificationEmail() {
+    const email = document.getElementById('loginEmail').value;
+    
+    if (!email) {
+        showAlert('Veuillez entrer votre email', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showAlert(data.message || 'Email de vérification renvoyé avec succès !', 'success');
+            startResendTimer();
+        } else {
+            if (response.status === 429) {
+                showAlert(data.error || 'Veuillez attendre avant de renvoyer un email', 'warning');
+                // Mettre à jour le timer avec le temps restant
+                resendCountdown = data.remainingTime || 60;
+                startResendTimer();
+            } else {
+                showAlert(data.error || 'Erreur lors du renvoi de l\'email', 'danger');
+            }
+        }
+    } catch (error) {
+        console.error('Erreur lors du renvoi:', error);
+        showAlert('Erreur lors du renvoi de l\'email', 'danger');
+    }
+}
+
 // Inscription d'un nouvel utilisateur
 async function registerUser(name, email, password, confirmPassword) {
     try {
-        const response = await fetch(`${API_BASE_URL}/users/register`, {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -474,25 +700,17 @@ async function registerUser(name, email, password, confirmPassword) {
         const data = await response.json();
         
         if (response.ok) {
-            userToken = data.token;
-            currentUser = data.user;
-            localStorage.setItem('userToken', userToken);
-            updateUIForAuthenticatedUser();
+            showAlert(data.message || 'Inscription réussie ! Veuillez vérifier votre email pour confirmer votre compte.', 'success');
             
-            // Fermer le modal de connexion
-            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-            loginModal.hide();
+            // Fermer le modal d'inscription
+            const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+            if (registerModal) {
+                registerModal.hide();
+            }
             
-            showNotification('Compte créé avec succès !', 'success');
-            
-            // Ouvrir le dashboard
-            setTimeout(() => {
-                const dashboardModal = new bootstrap.Modal(document.getElementById('userDashboardModal'));
-                dashboardModal.show();
-                loadUserDashboard();
-            }, 500);
+            // Ne pas connecter automatiquement - attendre la vérification email
         } else {
-            showNotification(data.error || 'Erreur lors de l\'inscription', 'error');
+            showAlert(data.message || 'Erreur lors de l\'inscription', 'danger');
         }
     } catch (error) {
         console.error('Erreur lors de l\'inscription:', error);
@@ -560,6 +778,12 @@ function logout() {
         loginLink.removeAttribute('title');
     }
     
+    // Masquer le lien "Soumettre" quand déconnecté
+    const submitLink = document.querySelector('a[href="#submit"]');
+    if (submitLink) {
+        submitLink.style.display = 'none';
+    }
+    
     // Fermer tous les modals ouverts et nettoyer les backdrops
     closeAllModals();
     
@@ -587,6 +811,11 @@ async function loadUserDashboard() {
             if (userNameDisplay && currentUser) {
                 userNameDisplay.textContent = 'Mon compte';
             }
+            
+            // Attacher les event listeners après l'affichage des vidéos
+            setTimeout(() => {
+                attachVideoEventListeners();
+            }, 100);
         } else {
             showNotification('Erreur lors du chargement des données', 'error');
         }
@@ -607,14 +836,29 @@ function displayUserVideos(videos, stats) {
     }
     
     container.innerHTML = videos.map(video => {
-        // Vérifier si la vidéo a une URL valide (plus permissive)
-        const hasValidUrl = video.s3Url && video.s3Url.trim() !== '' && video.s3Url !== 'undefined';
-        const videoUrl = hasValidUrl ? `${window.location.origin}${video.s3Url}` : '';
+        // Gérer les URLs Cloudinary et locales
+        let videoUrl = video.s3Url || video.videoUrl;
+        
+        // Si c'est une URL Cloudinary (commence par https://), l'utiliser directement
+        if (videoUrl && videoUrl.startsWith('https://')) {
+            // URL Cloudinary - utiliser directement
+            console.log('☁️ URL Cloudinary détectée dans dashboard utilisateur:', videoUrl);
+        } else if (videoUrl && !videoUrl.startsWith('http') && !videoUrl.startsWith('/uploads/')) {
+            // URL locale relative - ajouter le préfixe
+            videoUrl = `/uploads/${videoUrl}`;
+            console.log('📁 URL locale détectée dans dashboard utilisateur:', videoUrl);
+        } else if (videoUrl) {
+            // URL locale avec préfixe - utiliser directement
+            console.log('📁 URL locale avec préfixe dans dashboard utilisateur:', videoUrl);
+        }
+        
+        // Vérifier si la vidéo a une URL valide
+        const hasValidUrl = videoUrl && videoUrl.trim() !== '' && videoUrl !== 'undefined';
         const cursorStyle = hasValidUrl ? 'cursor: pointer;' : 'cursor: not-allowed;';
         const title = hasValidUrl ? 'Cliquer pour voir la vidéo' : 'Vidéo en cours de traitement';
         
         // Debug log pour comprendre le problème
-        console.log(`Video ${video.title}: s3Url="${video.s3Url}", hasValidUrl=${hasValidUrl}, status=${video.status}`);
+        console.log(`Video ${video.title}: s3Url="${video.s3Url}", videoUrl="${videoUrl}", hasValidUrl=${hasValidUrl}, status=${video.status}`);
         
         // Encoder les paramètres pour éviter les problèmes d'URL
         const encodedTitle = encodeURIComponent(video.title);
@@ -626,9 +870,9 @@ function displayUserVideos(videos, stats) {
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-2">
-                        <div class="user-video-thumbnail" style="${cursorStyle}" title="${title}" ${hasValidUrl ? `onclick="openVideoModal('${videoUrl}', '${encodedTitle}', '${encodedDescription}', '${encodedCategory}')"` : ''}>
+                        <div class="user-video-thumbnail" style="${cursorStyle}" title="${title}" ${hasValidUrl ? `data-video-url="${videoUrl}" data-video-title="${encodedTitle}" data-video-description="${encodedDescription}" data-video-category="${encodedCategory}"` : ''}>
                             ${hasValidUrl ? 
-                                `<video src="${videoUrl}" preload="metadata" style="width: 100%; height: 80px; object-fit: cover; border-radius: 6px; pointer-events: none;"></video>
+                                `<video src="${videoUrl}" preload="metadata" style="width: 100%; height: 80px; object-fit: contain; border-radius: 6px; pointer-events: none; background: #000;"></video>
                                 <div class="user-video-overlay" style="opacity: 1;">
                                     <i class="fas fa-play"></i>
                                 </div>` :
@@ -674,7 +918,7 @@ function displayUserVideos(videos, stats) {
                     <div class="col-md-2 text-end">
                         <div class="btn-group" role="group">
                         ${hasValidUrl ? 
-                            `<button class="btn btn-outline-primary btn-sm" onclick="openVideoModal('${videoUrl}', '${encodedTitle}', '${encodedDescription}', '${encodedCategory}')" title="Voir en grand">
+                            `<button class="btn btn-outline-primary btn-sm user-video-preview-btn" data-video-url="${videoUrl}" data-video-title="${encodedTitle}" data-video-description="${encodedDescription}" data-video-category="${encodedCategory}" title="Voir en grand">
                                 <i class="fas fa-expand-alt"></i>
                             </button>` :
                             `<button class="btn btn-outline-secondary btn-sm" disabled title="Vidéo en cours de traitement">
@@ -682,7 +926,7 @@ function displayUserVideos(videos, stats) {
                             </button>`
                         }
                             ${video.status === 'pending' ? 
-                                `<button class="btn btn-outline-danger btn-sm" onclick="cancelUserVideo('${video._id}', '${video.title}')" title="Annuler la soumission">
+                                `<button class="btn btn-outline-danger btn-sm user-video-cancel-btn" data-video-id="${video._id}" data-video-title="${video.title}" title="Annuler la soumission">
                                     <i class="fas fa-times"></i>
                                 </button>` : ''
                             }
@@ -753,6 +997,308 @@ function getStatusText(status) {
         case 'rejected': return 'Rejetée';
         default: return 'Inconnu';
     }
+}
+
+// Fonction pour attacher les event listeners des vidéos
+function attachVideoEventListeners() {
+    console.log('🔗 Attachement des event listeners vidéos...');
+    
+    // Supprimer les anciens event listeners pour éviter les doublons
+    document.querySelectorAll('.library-video-thumbnail, .video-thumbnail, .btn[data-video-url], .delete-approved-btn, .edit-partner-btn, .delete-partner-btn, .view-user-details, .view-user-payment, .toggle-user-ban, .user-video-thumbnail, .user-video-preview-btn, .user-video-cancel-btn, .toggle-fullscreen-btn, .download-video-btn, .retry-pending-btn, .retry-approved-btn, .category-select').forEach(element => {
+        element.replaceWith(element.cloneNode(true));
+    });
+    
+    // Event listeners pour les thumbnails de vidéos de la bibliothèque
+    document.querySelectorAll('.library-video-thumbnail').forEach(thumbnail => {
+        thumbnail.addEventListener('click', function(e) {
+            // Ne pas ouvrir le modal si l'utilisateur clique sur les contrôles vidéo
+            if (e.target.tagName === 'VIDEO' || e.target.closest('video')) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎬 Clic sur thumbnail bibliothèque');
+            const videoUrl = this.getAttribute('data-video-url');
+            const videoTitle = this.getAttribute('data-video-title');
+            const videoDescription = this.getAttribute('data-video-description');
+            const videoCategory = this.getAttribute('data-video-category');
+            console.log('📹 URL vidéo:', videoUrl);
+            openVideoModal(videoUrl, videoTitle, videoDescription, videoCategory);
+        });
+    });
+
+    // Event listeners pour les thumbnails de vidéos du dashboard utilisateur
+    document.querySelectorAll('.user-video-thumbnail').forEach(thumbnail => {
+        thumbnail.addEventListener('click', function(e) {
+            // Ne pas ouvrir le modal si l'utilisateur clique sur les contrôles vidéo
+            if (e.target.tagName === 'VIDEO' || e.target.closest('video')) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎬 Clic sur thumbnail dashboard utilisateur');
+            const videoUrl = this.getAttribute('data-video-url');
+            const videoTitle = this.getAttribute('data-video-title');
+            const videoDescription = this.getAttribute('data-video-description');
+            const videoCategory = this.getAttribute('data-video-category');
+            console.log('📹 URL vidéo:', videoUrl);
+            openVideoModal(videoUrl, videoTitle, videoDescription, videoCategory);
+        });
+    });
+    
+    // Event listeners pour les thumbnails de vidéos récentes
+    document.querySelectorAll('.video-thumbnail').forEach(thumbnail => {
+        thumbnail.addEventListener('click', function(e) {
+            // Ne pas ouvrir le modal si l'utilisateur clique sur les contrôles vidéo
+            if (e.target.tagName === 'VIDEO' || e.target.closest('video')) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎬 Clic sur thumbnail vidéos récentes');
+            const videoUrl = this.getAttribute('data-video-url');
+            const videoTitle = this.getAttribute('data-video-title');
+            const videoDescription = this.getAttribute('data-video-description');
+            const videoCategory = this.getAttribute('data-video-category');
+            console.log('📹 URL vidéo:', videoUrl);
+            openVideoModal(videoUrl, videoTitle, videoDescription, videoCategory);
+        });
+    });
+    
+
+    
+    // Event listeners pour les boutons "Regarder"
+    document.querySelectorAll('.btn[data-video-url]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎬 Clic sur bouton Regarder');
+            const videoUrl = this.getAttribute('data-video-url');
+            const videoTitle = this.getAttribute('data-video-title');
+            const videoDescription = this.getAttribute('data-video-description');
+            const videoCategory = this.getAttribute('data-video-category');
+            console.log('📹 URL vidéo:', videoUrl);
+            openVideoModal(videoUrl, videoTitle, videoDescription, videoCategory);
+        });
+    });
+    
+    // Event listeners pour les boutons de prévisualisation
+    document.querySelectorAll('.btn[data-video-url][title="Prévisualiser"]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const videoUrl = this.getAttribute('data-video-url');
+            const videoTitle = this.getAttribute('data-video-title');
+            previewApprovedVideo(videoUrl, videoTitle);
+        });
+    });
+
+    // Event listeners pour les boutons de prévisualisation du dashboard utilisateur
+    document.querySelectorAll('.user-video-preview-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const videoUrl = this.getAttribute('data-video-url');
+            const videoTitle = this.getAttribute('data-video-title');
+            const videoDescription = this.getAttribute('data-video-description');
+            const videoCategory = this.getAttribute('data-video-category');
+            console.log('🎬 Clic sur bouton prévisualisation dashboard utilisateur');
+            openVideoModal(videoUrl, videoTitle, videoDescription, videoCategory);
+        });
+    });
+
+    // Event listeners pour les boutons d'annulation du dashboard utilisateur
+    document.querySelectorAll('.user-video-cancel-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const videoId = this.getAttribute('data-video-id');
+            const videoTitle = this.getAttribute('data-video-title');
+            console.log('🗑️ Clic sur bouton annulation dashboard utilisateur:', videoId);
+            cancelUserVideo(videoId, videoTitle);
+        });
+    });
+    
+    // Event listeners pour les boutons de suppression des vidéos approuvées
+    document.querySelectorAll('.delete-approved-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const videoId = this.getAttribute('data-video-id');
+            const videoTitle = this.getAttribute('data-video-title');
+            deleteApprovedVideo(videoId, videoTitle);
+        });
+    });
+    
+    console.log('✅ Event listeners vidéos attachés');
+    
+    // Event listeners pour les partenaires
+    document.querySelectorAll('.edit-partner-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const partnerId = this.getAttribute('data-partner-id');
+            console.log('✏️ Clic sur bouton Modifier partenaire:', partnerId);
+            editPartner(partnerId);
+        });
+    });
+    
+    document.querySelectorAll('.delete-partner-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const partnerId = this.getAttribute('data-partner-id');
+            console.log('🗑️ Clic sur bouton Supprimer partenaire:', partnerId);
+            deletePartner(partnerId);
+        });
+    });
+    
+    console.log('✅ Event listeners partenaires attachés');
+    
+    // Event listeners pour les utilisateurs
+    document.querySelectorAll('.view-user-details').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const userId = this.getAttribute('data-user-id');
+            viewUserDetails(userId);
+        });
+    });
+    
+    document.querySelectorAll('.view-user-payment').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const userId = this.getAttribute('data-user-id');
+            viewUserPayment(userId);
+        });
+    });
+    
+    document.querySelectorAll('.toggle-user-ban').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const userId = this.getAttribute('data-user-id');
+            const isBanned = this.getAttribute('data-is-banned') === 'true';
+            toggleUserBan(userId, !isBanned);
+        });
+    });
+    
+    document.querySelectorAll('.delete-user-btn').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const userId = this.getAttribute('data-user-id');
+            const userName = this.getAttribute('data-user-name');
+            const userEmail = this.getAttribute('data-user-email');
+            deleteUser(userId, userName, userEmail);
+        });
+    });
+    
+    console.log('✅ Event listeners utilisateurs attachés');
+    
+    // Event listeners pour les catégories
+    document.querySelectorAll('.delete-category-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const categoryId = this.getAttribute('data-category-id');
+            const categoryName = this.getAttribute('data-category-name');
+            deleteCategory(categoryId, categoryName);
+        });
+    });
+    
+    console.log('✅ Event listeners catégories attachés');
+}
+
+// Fonction pour attacher les event listeners des catégories
+function attachCategoryEventListeners() {
+    console.log('🔗 Attachement des event listeners catégories...');
+    
+    // Supprimer les anciens event listeners pour éviter les doublons
+    document.querySelectorAll('.delete-category-btn').forEach(element => {
+        element.replaceWith(element.cloneNode(true));
+    });
+    
+    document.querySelectorAll('.edit-category-btn').forEach(element => {
+        element.replaceWith(element.cloneNode(true));
+    });
+    
+    // Event listeners pour les boutons de modification de catégories
+    document.querySelectorAll('.edit-category-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const categoryId = this.getAttribute('data-category-id');
+            const categoryName = this.getAttribute('data-category-name');
+            editCategory(categoryId, categoryName);
+        });
+    });
+    
+    // Event listeners pour les boutons de suppression de catégories
+    document.querySelectorAll('.delete-category-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const categoryId = this.getAttribute('data-category-id');
+            const categoryName = this.getAttribute('data-category-name');
+            deleteCategory(categoryId, categoryName);
+        });
+    });
+    
+    console.log('✅ Event listeners catégories attachés');
+    
+    // Event listeners pour les boutons de plein écran
+    document.querySelectorAll('.toggle-fullscreen-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🖥️ Clic sur bouton plein écran');
+            toggleFullscreen();
+        });
+    });
+    
+    // Event listeners pour les boutons de téléchargement
+    document.querySelectorAll('.download-video-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const videoUrl = this.getAttribute('data-video-url');
+            const videoTitle = this.getAttribute('data-video-title');
+            console.log('📥 Clic sur bouton téléchargement:', videoUrl);
+            downloadVideo(videoUrl, videoTitle);
+        });
+    });
+    
+    // Event listeners pour les boutons de retry pending
+    document.querySelectorAll('.retry-pending-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔄 Clic sur bouton retry pending');
+            loadPendingVideos();
+        });
+    });
+    
+    // Event listeners pour les boutons de retry approved
+    document.querySelectorAll('.retry-approved-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔄 Clic sur bouton retry approved');
+            loadApprovedVideos();
+        });
+    });
+    
+    // Event listeners pour les selects de catégorie
+    document.querySelectorAll('.category-select').forEach(select => {
+        select.addEventListener('change', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const videoId = this.getAttribute('data-video-id');
+            const categoryId = this.value;
+            console.log('🏷️ Changement de catégorie:', videoId, categoryId);
+            updateVideoCategory(videoId, categoryId);
+        });
+    });
+    
+    console.log('✅ Event listeners supplémentaires attachés');
 }
 
 // Configuration des événements
@@ -915,6 +1461,14 @@ function setupEventListeners() {
         registerForm.addEventListener('submit', handleRegister);
     }
     
+    // Event listener pour la validation du mot de passe lors de l'inscription
+    const registerPassword = document.getElementById('registerPassword');
+    if (registerPassword) {
+        registerPassword.addEventListener('input', function() {
+            updatePasswordStrength(this.value);
+        });
+    }
+    
     // Boutons de déconnexion
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
@@ -1066,6 +1620,83 @@ function setupEventListeners() {
         partnerForm.addEventListener('submit', handlePartnerForm);
     }
     
+    // Bouton Ajouter un partenaire
+    const addPartnerBtn = document.getElementById('addPartnerBtn');
+    if (addPartnerBtn) {
+        addPartnerBtn.addEventListener('click', function() {
+            // Vider complètement le formulaire
+            document.getElementById('partnerForm').reset();
+            document.getElementById('partnerId').value = '';
+            document.getElementById('partnerModalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>Ajouter un Partenaire';
+            console.log('🧹 Formulaire vidé pour nouvel ajout');
+            
+            const modal = new bootstrap.Modal(document.getElementById('addPartnerModal'));
+            modal.show();
+        });
+    }
+    
+    // Liens pour les conditions et politique de confidentialité
+    const termsLink = document.getElementById('termsLink');
+    if (termsLink) {
+        termsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openTermsModal();
+        });
+    }
+    
+    const privacyLink = document.getElementById('privacyLink');
+    if (privacyLink) {
+        privacyLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openPrivacyModal();
+        });
+    }
+    
+    // Bouton mot de passe oublié
+    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+    if (forgotPasswordBtn) {
+        forgotPasswordBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            showForgotPassword();
+        });
+    }
+    
+    // Bouton fermer mot de passe oublié
+    const closeForgotPasswordBtn = document.getElementById('closeForgotPasswordBtn');
+    if (closeForgotPasswordBtn) {
+        closeForgotPasswordBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeForgotPasswordModal();
+        });
+    }
+    
+    // Bouton recherche vidéos approuvées
+    const searchApprovedVideosBtn = document.getElementById('searchApprovedVideosBtn');
+    if (searchApprovedVideosBtn) {
+        searchApprovedVideosBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            searchApprovedVideos();
+        });
+    }
+    
+    // Bouton recherche utilisateurs
+    const searchUsersBtn = document.getElementById('searchUsersBtn');
+    if (searchUsersBtn) {
+        searchUsersBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            searchUsers();
+        });
+    }
+    
+    // Bouton recherche bibliothèque
+    const searchLibraryVideosBtn = document.getElementById('searchLibraryVideosBtn');
+    if (searchLibraryVideosBtn) {
+        searchLibraryVideosBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            searchLibraryVideos();
+        });
+    }
+    
     // Formulaire de mot de passe oublié
     const forgotPasswordForm = document.getElementById('forgotPasswordForm');
     if (forgotPasswordForm) {
@@ -1076,14 +1707,9 @@ function setupEventListeners() {
     const partnersModal = document.getElementById('partnersModal');
     if (partnersModal) {
         partnersModal.addEventListener('shown.bs.modal', function() {
-            // Vérifier si l'utilisateur est admin et afficher la bonne section
-            if (adminToken && currentUser && currentUser.isAdmin) {
-                showAdminSections();
-                loadAdminPartners();
-            } else {
-                showPublicSections();
-                loadPartners();
-            }
+            // Toujours afficher la section publique des partenaires
+            showPublicSections();
+            loadPartners();
         });
     }
     
@@ -1099,6 +1725,9 @@ function setupEventListeners() {
     const loginModal = document.getElementById('loginModal');
     if (loginModal) {
         loginModal.addEventListener('shown.bs.modal', function() {
+            // Masquer le bouton de renvoi d'email quand le modal s'ouvre
+            hideResendEmailButton();
+            
             // S'assurer que les onglets sont visibles
             const authTabs = document.getElementById('authTabs');
             if (authTabs) {
@@ -1131,6 +1760,11 @@ function setupEventListeners() {
             }
         });
         
+        // Masquer le bouton de renvoi d'email quand le modal se ferme
+        loginModal.addEventListener('hidden.bs.modal', function() {
+            hideResendEmailButton();
+        });
+        
         // Gestionnaire pour les onglets
         const authTabs = document.getElementById('authTabs');
         if (authTabs) {
@@ -1161,6 +1795,14 @@ function setupEventListeners() {
                         }, 10);
                     }
                 }
+            });
+        }
+        
+        // Gestionnaire pour le bouton de renvoi d'email
+        const resendEmailBtn = loginModal.querySelector('#resendEmailBtn');
+        if (resendEmailBtn) {
+            resendEmailBtn.addEventListener('click', function() {
+                resendVerificationEmail();
             });
         }
     }
@@ -1259,6 +1901,19 @@ async function handleRegister(event) {
     const email = document.getElementById('registerEmail').value;
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    // Validation de la force du mot de passe
+    const { score } = checkPasswordStrength(password);
+    if (score < 3) {
+        showAlert('Le mot de passe doit être au moins de force moyenne (3/5). Veuillez choisir un mot de passe plus sécurisé.', 'warning');
+        return;
+    }
+    
+    // Validation de la correspondance des mots de passe
+    if (password !== confirmPassword) {
+        showAlert('Les mots de passe ne correspondent pas.', 'danger');
+        return;
+    }
     
     await registerUser(name, email, password, confirmPassword);
 }
@@ -1526,17 +2181,37 @@ function displayLibraryVideos(videos) {
         return;
     }
     
-    const libraryHTML = videos.map(video => `
+    const libraryHTML = videos.map(video => {
+        // Gérer les URLs Cloudinary et locales
+        let videoUrl = video.s3Url || video.videoUrl;
+        
+        // Si c'est une URL Cloudinary (commence par https://), l'utiliser directement
+        if (videoUrl && videoUrl.startsWith('https://')) {
+            // URL Cloudinary - utiliser directement
+            console.log('☁️ URL Cloudinary détectée:', videoUrl);
+        } else if (videoUrl && !videoUrl.startsWith('http') && !videoUrl.startsWith('/uploads/')) {
+            // URL locale relative - ajouter le préfixe
+            videoUrl = `/uploads/${videoUrl}`;
+            console.log('📁 URL locale détectée:', videoUrl);
+        } else if (videoUrl) {
+            // URL locale avec préfixe - utiliser directement
+            console.log('📁 URL locale avec préfixe:', videoUrl);
+        }
+        
+        return `
         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
             <div class="library-video-card h-100">
-                <div class="library-video-thumbnail" onclick="openVideoModal('${window.location.origin}${video.s3Url}', '${video.title}', '${video.description || 'Aucune description'}', '${video.category ? video.category.name : 'Non catégorisé'}')">
-                    <video src="${window.location.origin}${video.s3Url}" preload="metadata"></video>
+                <div class="library-video-thumbnail" data-video-url="${videoUrl}" data-video-title="${video.title}" data-video-description="${video.description || 'Aucune description'}" data-video-category="${video.category ? video.category.name : 'Non catégorisé'}">
+                    <video controls preload="metadata" class="w-100 h-100">
+                        <source src="${videoUrl}" type="video/mp4">
+                        Votre navigateur ne supporte pas la lecture vidéo.
+                    </video>
                     <div class="library-play-overlay">
                         <i class="fas fa-play"></i>
                     </div>
                     ${(adminToken && currentUser && currentUser.isAdmin === true) ? `
                         <div class="library-admin-actions">
-                            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteApprovedVideo('${video._id}', '${video.title}')" title="Supprimer">
+                            <button class="btn btn-danger btn-sm delete-approved-btn" data-video-id="${video._id}" data-video-title="${video.title}" title="Supprimer">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -1553,10 +2228,15 @@ function displayLibraryVideos(videos) {
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
     
     container.innerHTML = libraryHTML;
     console.log('✅ Vidéos affichées dans libraryContainer');
+    
+    // Re-attacher les event listeners pour les nouvelles vidéos avec un délai
+    setTimeout(() => {
+        attachVideoEventListeners();
+    }, 100);
 }
 
 // Recherche dans la bibliothèque
@@ -1605,8 +2285,8 @@ function displayVideos(videos) {
     if (limitedVideos.length === 0) {
         console.log('📭 Aucune vidéo à afficher');
         container.innerHTML = `
-            <div class="text-center py-5">
-                <div class="alert alert-info">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; padding-top: 50px;">
+                <div class="alert alert-info text-center" style="max-width: 400px; margin: 0 auto; display: inline-block;">
                     <i class="fas fa-info-circle me-2"></i>
                     Aucune vidéo disponible pour le moment.
                 </div>
@@ -1615,10 +2295,39 @@ function displayVideos(videos) {
         return;
     }
     
-    const videosHTML = limitedVideos.map(video => `
+    const videosHTML = limitedVideos.map(video => {
+        // Gérer les URLs Cloudinary et locales
+        let videoUrl = video.s3Url || video.videoUrl;
+        
+        console.log('🔍 DEBUG URL pour vidéo:', video.title);
+        console.log('  - s3Url original:', video.s3Url);
+        console.log('  - videoUrl original:', video.videoUrl);
+        console.log('  - videoUrl sélectionnée:', videoUrl);
+        
+        // Si c'est une URL Cloudinary (commence par https://), l'utiliser directement
+        if (videoUrl && videoUrl.startsWith('https://')) {
+            // URL Cloudinary - utiliser directement
+            console.log('☁️ URL Cloudinary détectée:', videoUrl);
+        } else if (videoUrl && !videoUrl.startsWith('http') && !videoUrl.startsWith('/uploads/')) {
+            // URL locale relative - ajouter le préfixe
+            videoUrl = `/uploads/${videoUrl}`;
+            console.log('📁 URL locale détectée:', videoUrl);
+        } else if (videoUrl) {
+            // URL locale avec préfixe - utiliser directement
+            console.log('📁 URL locale avec préfixe:', videoUrl);
+        } else {
+            console.log('⚠️ Pas d\'URL trouvée pour la vidéo');
+        }
+        
+        console.log('  - URL finale utilisée:', videoUrl);
+        
+        return `
         <div class="video-card fade-in-up">
-            <div class="video-thumbnail" onclick="openVideoModal('${window.location.origin}${video.s3Url}', '${video.title}', '${video.description || 'Aucune description'}', '${video.category ? video.category.name : 'Non catégorisé'}')">
-                <video src="${window.location.origin}${video.s3Url}" preload="metadata"></video>
+            <div class="video-thumbnail" data-video-url="${videoUrl}" data-video-title="${video.title}" data-video-description="${video.description || 'Aucune description'}" data-video-category="${video.category ? video.category.name : 'Non catégorisé'}">
+                <video controls preload="metadata" class="w-100 h-100">
+                    <source src="${videoUrl}" type="video/mp4">
+                    Votre navigateur ne supporte pas la lecture vidéo.
+                </video>
                 <div class="play-button">
                     <i class="fas fa-play"></i>
                 </div>
@@ -1635,28 +2344,33 @@ function displayVideos(videos) {
                         <i class="fas fa-calendar me-1"></i>${new Date(video.submittedAt).toLocaleDateString('fr-FR')}
                     </small>
                 </div>
-                <div class="video-actions mt-2">
-                    <button class="btn btn-primary btn-sm" onclick="openVideoModal('${window.location.origin}${video.s3Url}', '${video.title}', '${video.description || 'Aucune description'}', '${video.category ? video.category.name : 'Non catégorisé'}')">
+                <div class="video-actions mt-2 text-center">
+                    <button class="btn btn-primary btn-sm" data-video-url="${videoUrl}" data-video-title="${video.title}" data-video-description="${video.description || 'Aucune description'}" data-video-category="${video.category ? video.category.name : 'Non catégorisé'}">
                         <i class="fas fa-play me-1"></i>Regarder
                     </button>
                     ${(adminToken && currentUser && currentUser.isAdmin) ? `
-                        <button class="btn btn-outline-danger btn-sm ms-1" onclick="deleteApprovedVideo('${video._id}', '${video.title}')">
+                        <button class="btn btn-outline-danger btn-sm ms-1 delete-approved-btn" data-video-id="${video._id}" data-video-title="${video.title}">
                             <i class="fas fa-trash"></i>
                         </button>
                     ` : ''}
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
     
     container.innerHTML = videosHTML;
     console.log('✅ Vidéos affichées dans videosContainer');
+    
+    // Re-attacher les event listeners pour les nouvelles vidéos avec un délai
+    setTimeout(() => {
+        attachVideoEventListeners();
+    }, 100);
 }
 
 // Ouvrir un modal pour visionner une vidéo
 function openVideoModal(videoUrl, title, description, category) {
     console.log('=== DEBUG openVideoModal ===');
-    console.log('videoUrl:', videoUrl);
+    console.log('videoUrl reçue:', videoUrl);
     console.log('title:', title);
     console.log('description:', description);
     console.log('category:', category);
@@ -1664,8 +2378,28 @@ function openVideoModal(videoUrl, title, description, category) {
     
     // Vérifier si l'URL est valide
     if (!videoUrl || videoUrl.trim() === '') {
-        console.error('URL vidéo invalide:', videoUrl);
+        console.error('❌ URL vidéo invalide:', videoUrl);
         showAlert('Erreur: URL vidéo invalide', 'error');
+        return;
+    }
+    
+    // Tester l'URL
+    console.log('🧪 Test de l\'URL vidéo:', videoUrl);
+    fetch(videoUrl, { method: 'HEAD' })
+        .then(response => {
+            console.log('✅ URL accessible:', response.status, response.statusText);
+        })
+        .catch(error => {
+            console.error('❌ URL non accessible:', error.message);
+        });
+    
+    // Empêcher l'ouverture de plusieurs modals
+    if (document.getElementById('videoModal')) {
+        console.log('Modal déjà ouvert, fermeture...');
+        const existingModal = bootstrap.Modal.getInstance(document.getElementById('videoModal'));
+        if (existingModal) {
+            existingModal.hide();
+        }
         return;
     }
     
@@ -1688,8 +2422,8 @@ function openVideoModal(videoUrl, title, description, category) {
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-8">
-                                <div class="video-preview-container">
-                                    <video id="modalVideo" controls style="width: 100%; height: 300px; object-fit: contain;">
+                                <div class="video-preview-container" style="background: #000; border-radius: 8px; overflow: hidden;">
+                                    <video id="modalVideo" controls style="width: 100%; height: auto; max-height: 400px; object-fit: contain; display: block;">
                                         <source src="${videoUrl}" type="video/mp4">
                                         Votre navigateur ne supporte pas la lecture vidéo.
                                     </video>
@@ -1710,11 +2444,11 @@ function openVideoModal(videoUrl, title, description, category) {
                                     
                                     <div class="mt-4">
                                         <h6>Actions</h6>
-                                        <button class="btn btn-outline-primary btn-sm" onclick="toggleFullscreen()">
+                                        <button class="btn btn-outline-primary btn-sm toggle-fullscreen-btn">
                                             <i class="fas fa-expand me-1"></i>Plein écran
                                         </button>
                                         ${(adminToken && currentUser && currentUser.isAdmin) ? `
-                                            <button class="btn btn-outline-secondary btn-sm ms-1" onclick="downloadVideo('${videoUrl}', '${decodedTitle}')">
+                                            <button class="btn btn-outline-secondary btn-sm ms-1 download-video-btn" data-video-url="${videoUrl}" data-video-title="${decodedTitle}">
                                                 <i class="fas fa-download me-1"></i>Télécharger
                                             </button>
                                         ` : ''}
@@ -2121,6 +2855,12 @@ function showAdminPanel() {
         
         // Nettoyer les onglets avant de charger les données
         setTimeout(() => {
+            // Retirer la classe active de tous les onglets
+            const allTabs = document.querySelectorAll('#adminTabs .nav-link');
+            allTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
             // Masquer tous les contenus d'onglets
             const allTabPanes = document.querySelectorAll('.tab-pane');
             allTabPanes.forEach(pane => {
@@ -2129,7 +2869,7 @@ function showAdminPanel() {
             });
             
             // S'assurer que le premier onglet est actif
-            const firstTab = document.querySelector('#adminPanelModal .nav-link');
+            const firstTab = document.querySelector('#adminTabs .nav-link');
             if (firstTab) {
                 firstTab.classList.add('active');
                 const targetId = firstTab.getAttribute('href');
@@ -2140,7 +2880,7 @@ function showAdminPanel() {
                 }
             }
             
-        loadAdminData();
+            loadAdminData();
         }, 100);
     } catch (error) {
         console.error('Erreur lors de l\'ouverture de la modal:', error);
@@ -2242,7 +2982,7 @@ async function loadPendingVideos() {
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     Erreur lors du chargement des vidéos en attente. 
-                    <button class="btn btn-sm btn-outline-danger ms-2" onclick="loadPendingVideos()">
+                    <button class="btn btn-sm btn-outline-danger ms-2 retry-pending-btn">
                         <i class="fas fa-redo me-1"></i>Réessayer
                     </button>
                 </div>
@@ -2291,7 +3031,7 @@ function displayPendingVideos(videos) {
                 <div class="mb-2">
                     <label class="form-label small">Catégorie :</label>
                     <div class="d-flex align-items-center">
-                        <select class="form-select form-select-sm me-2" id="categorySelect_${video._id}" onchange="updateVideoCategory('${video._id}', this.value)">
+                        <select class="form-select form-select-sm me-2 category-select" id="categorySelect_${video._id}" data-video-id="${video._id}">
                             <option value="">Aucune catégorie</option>
                             ${categories.map(cat => `
                                 <option value="${cat._id}" ${video.category && video.category._id === cat._id ? 'selected' : ''}>
@@ -2372,9 +3112,10 @@ function displayPendingVideos(videos) {
                 
                 <div class="col-md-4">
                 <!-- Aperçu vidéo -->
-                    <div class="video-preview-container" style="padding-top: 20px;">
-                        <video controls preload="metadata" class="video-preview w-100" style="max-height: 200px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <source src="${window.location.origin}${video.s3Url}" type="video/mp4">
+                    <div class="video-preview-container" style="padding-top: 20px; background: #000; border-radius: 8px; overflow: hidden;">
+                        <video controls preload="metadata" class="video-preview w-100" style="height: 200px; object-fit: contain; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: #000;">
+                        <source src="${window.location.origin}${video.s3Url || video.videoUrl || `/uploads/${video.filename}`}" type="video/mp4">
+                        <source src="${video.s3Url || video.videoUrl || `/uploads/${video.filename}`}" type="video/mp4">
                         Votre navigateur ne supporte pas la lecture vidéo.
                     </video>
                     </div>
@@ -2382,15 +3123,39 @@ function displayPendingVideos(videos) {
             </div>
             
             <div class="admin-actions mt-3">
-                <button class="btn btn-success btn-sm" onclick="validatePendingVideo('${video._id}')">
+                <button class="btn btn-success btn-sm validate-btn" data-video-id="${video._id}">
                     <i class="fas fa-check me-1"></i>Valider
                 </button>
-                <button class="btn btn-warning btn-sm" onclick="rejectPendingVideo('${video._id}')">
+                <button class="btn btn-warning btn-sm reject-btn" data-video-id="${video._id}">
                     <i class="fas fa-times me-1"></i>Rejeter
                 </button>
             </div>
         </div>
     `).join('');
+    
+    // Ajouter les event listeners pour les boutons
+    setTimeout(() => {
+        // Event listeners pour les boutons de validation
+        document.querySelectorAll('.validate-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const videoId = this.getAttribute('data-video-id');
+                validatePendingVideo(videoId);
+            });
+        });
+        
+        // Event listeners pour les boutons de rejet
+        document.querySelectorAll('.reject-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const videoId = this.getAttribute('data-video-id');
+                rejectPendingVideo(videoId);
+            });
+        });
+        
+                // Attacher les event listeners pour les vidéos
+        attachVideoEventListeners();
+        
+        console.log('✅ Event listeners ajoutés pour les boutons admin et vidéos');
+    }, 100);
 }
 
 // Mettre à jour la catégorie d'une vidéo
@@ -2628,7 +3393,7 @@ async function loadApprovedVideos(categoryFilter = null) {
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     Erreur lors du chargement des vidéos approuvées. 
-                    <button class="btn btn-sm btn-outline-danger ms-2" onclick="loadApprovedVideos()">
+                    <button class="btn btn-sm btn-outline-danger ms-2 retry-approved-btn">
                         <i class="fas fa-redo me-1"></i>Réessayer
                     </button>
                 </div>
@@ -2649,14 +3414,31 @@ function displayApprovedVideos(videos) {
         return;
     }
     
-    container.innerHTML = videos.map(video => `
+    container.innerHTML = videos.map(video => {
+        // Gérer les URLs Cloudinary et locales
+        let videoUrl = video.s3Url || video.videoUrl;
+        
+        // Si c'est une URL Cloudinary (commence par https://), l'utiliser directement
+        if (videoUrl && videoUrl.startsWith('https://')) {
+            // URL Cloudinary - utiliser directement
+            console.log('☁️ URL Cloudinary détectée:', videoUrl);
+        } else if (videoUrl && !videoUrl.startsWith('http') && !videoUrl.startsWith('/uploads/')) {
+            // URL locale relative - ajouter le préfixe
+            videoUrl = `/uploads/${videoUrl}`;
+            console.log('📁 URL locale détectée:', videoUrl);
+        } else if (videoUrl) {
+            // URL locale avec préfixe - utiliser directement
+            console.log('📁 URL locale avec préfixe:', videoUrl);
+        }
+        
+        return `
         <div class="card mb-3 approved-video-item">
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-2">
-                        <div class="video-thumbnail-small">
-                            <video preload="metadata" class="w-100" style="max-height: 60px; object-fit: cover; border-radius: 4px;">
-                                <source src="${window.location.origin}${video.s3Url}" type="video/mp4">
+                        <div class="video-thumbnail-small" style="background: #000; border-radius: 4px; overflow: hidden;">
+                            <video controls preload="metadata" class="w-100" style="height: 60px; object-fit: contain; border-radius: 4px; background: #000;">
+                                <source src="${videoUrl}" type="video/mp4">
                             </video>
                         </div>
                     </div>
@@ -2675,17 +3457,22 @@ function displayApprovedVideos(videos) {
                         </span>
                     </div>
                     <div class="col-md-2 text-end">
-                        <button class="btn btn-outline-primary btn-sm me-1" onclick="previewApprovedVideo('${window.location.origin}${video.s3Url}', '${video.title}')" title="Prévisualiser">
+                        <button class="btn btn-outline-primary btn-sm me-1" data-video-url="${videoUrl}" data-video-title="${video.title}" title="Prévisualiser">
                             <i class="fas fa-play"></i>
                         </button>
-                        <button class="btn btn-outline-danger btn-sm" onclick="deleteApprovedVideo('${video._id}', '${video.title}')" title="Supprimer définitivement">
+                        <button class="btn btn-outline-danger btn-sm delete-approved-btn" data-video-id="${video._id}" data-video-title="${video.title}" title="Supprimer définitivement">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
+    
+    // Attacher les event listeners après l'affichage
+    setTimeout(() => {
+        attachVideoEventListeners();
+    }, 100);
 }
 
 // Rechercher dans les vidéos approuvées
@@ -2733,6 +3520,11 @@ async function loadApprovedVideosWithSearch(categoryFilter = 'all', searchTerm =
         }
         
         displayApprovedVideos(videos);
+        
+        // Re-attacher les event listeners pour les nouvelles vidéos
+        setTimeout(() => {
+            attachVideoEventListeners();
+        }, 100);
     } catch (error) {
         console.error('Erreur chargement vidéos approuvées avec recherche:', error);
         showAlert('Erreur lors du chargement des vidéos approuvées', 'danger');
@@ -2826,6 +3618,137 @@ async function deleteApprovedVideo(videoId, title) {
     }
 }
 
+// Nettoyer les anciennes vidéos qui ne fonctionnent plus
+async function cleanupOldVideos() {
+    if (!confirm('Voulez-vous supprimer les anciennes vidéos qui ne fonctionnent plus ?')) {
+        return;
+    }
+    
+    try {
+        const token = adminToken || userToken;
+        const response = await fetch(`${API_BASE_URL}/admin/videos/cleanup`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        showAlert(result.message, 'success');
+        
+        // Recharger les données
+        await loadAdminData();
+        
+    } catch (error) {
+        console.error('Erreur lors du nettoyage des vidéos:', error);
+        showAlert('Erreur lors du nettoyage des vidéos', 'danger');
+    }
+}
+
+// Nettoyer complètement toutes les vidéos (nettoyage complet)
+async function cleanupAllVideos() {
+    if (!confirm('⚠️ ATTENTION : Voulez-vous supprimer TOUTES les vidéos de la base de données ? Cette action est irréversible !')) {
+        return;
+    }
+    
+    try {
+        const token = adminToken || userToken;
+        const response = await fetch(`${API_BASE_URL}/admin/videos/cleanup-all`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        showAlert(result.message, 'success');
+        
+        // Recharger les données
+        await loadAdminData();
+        
+    } catch (error) {
+        console.error('Erreur lors du nettoyage complet:', error);
+        showAlert('Erreur lors du nettoyage complet', 'danger');
+    }
+}
+
+// Garder seulement la vidéo "test1"
+async function keepOnlyTest1() {
+    if (!confirm('Voulez-vous supprimer toutes les vidéos sauf "test1" ?')) {
+        return;
+    }
+    
+    try {
+        const token = adminToken || userToken;
+        const response = await fetch(`${API_BASE_URL}/admin/videos/keep-only-test1`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        showAlert(result.message, 'success');
+        
+        // Recharger les données
+        await loadAdminData();
+        
+    } catch (error) {
+        console.error('Erreur lors du nettoyage:', error);
+        showAlert('Erreur lors du nettoyage', 'danger');
+    }
+}
+
+// Supprimer TOUTES les vidéos (nettoyage total)
+async function deleteAllVideosNow() {
+    if (!confirm('⚠️ ATTENTION : Voulez-vous supprimer TOUTES les vidéos de la base de données ? Cette action est irréversible !')) {
+        return;
+    }
+    
+    try {
+        const token = adminToken || userToken;
+        const response = await fetch(`${API_BASE_URL}/admin/videos/cleanup-all`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        showAlert(result.message, 'success');
+        
+        // Recharger toutes les données
+        await loadAdminData();
+        await loadVideos();
+        await loadLibraryVideos();
+        
+        // Forcer le rechargement de la page après 2 secondes
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erreur lors de la suppression totale:', error);
+        showAlert('Erreur lors de la suppression totale', 'danger');
+    }
+}
+
 async function loadAdminCategories() {
     try {
         const response = await fetch(`${API_BASE_URL}/categories`);
@@ -2848,11 +3771,21 @@ function displayAdminCategories(categories) {
     container.innerHTML = categories.map(category => `
         <div class="category-item">
             <span>${category.name}</span>
-            <button class="btn btn-danger btn-sm" onclick="deleteCategory('${category._id}')">
-                <i class="fas fa-trash"></i>
-            </button>
+            <div class="btn-group" role="group">
+                <button class="btn btn-primary btn-sm edit-category-btn" data-category-id="${category._id}" data-category-name="${category.name}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-sm delete-category-btn" data-category-id="${category._id}" data-category-name="${category.name}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
         </div>
     `).join('');
+    
+    // Attacher les event listeners après l'affichage
+    setTimeout(() => {
+        attachCategoryEventListeners();
+    }, 100);
 }
 
 // Fonction pour ajouter une catégorie
@@ -2868,11 +3801,12 @@ async function handleAddCategory(event) {
     }
     
     try {
-        const response = await fetch(`${API_BASE_URL}/categories/admin`, {
+        const token = adminToken || userToken;
+        const response = await fetch(`${API_BASE_URL}/admin/categories`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${adminToken}`
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ name })
         });
@@ -2882,11 +3816,11 @@ async function handleAddCategory(event) {
             document.getElementById('newCategoryName').value = '';
             // Recharger les catégories et mettre à jour les filtres
             await loadCategories();
-            loadAdminCategories();
-            await updateStats();
+            await loadAdminCategories();
+            await updateCategorySelect();
         } else {
-            const result = await response.json();
-            showAlert(result.error || 'Erreur lors de l\'ajout de la catégorie', 'danger');
+            const error = await response.json();
+            showAlert(error.error || 'Erreur lors de l\'ajout de la catégorie', 'danger');
         }
     } catch (error) {
         console.error('Erreur ajout catégorie:', error);
@@ -2894,81 +3828,114 @@ async function handleAddCategory(event) {
     }
 }
 
+// Fonction pour modifier une catégorie
+async function editCategory(categoryId, currentName) {
+    const newName = prompt(`Modifier le nom de la catégorie "${currentName}" :`, currentName);
+    
+    if (!newName || newName.trim() === '') {
+        showAlert('Le nom de la catégorie ne peut pas être vide', 'warning');
+        return;
+    }
+    
+    if (newName === currentName) {
+        showAlert('Aucune modification apportée', 'info');
+        return;
+    }
+    
+    try {
+        const token = adminToken || userToken;
+        const response = await fetch(`${API_BASE_URL}/admin/categories/${categoryId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ name: newName.trim() })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            showAlert(result.message || 'Catégorie modifiée avec succès !', 'success');
+            // Recharger les catégories et mettre à jour les filtres
+            await loadCategories();
+            await loadAdminCategories();
+            await updateCategorySelect();
+            // Mettre à jour les compteurs
+            await updateStats();
+        } else {
+            const error = await response.json();
+            showAlert(error.error || 'Erreur lors de la modification de la catégorie', 'danger');
+        }
+    } catch (error) {
+        console.error('Erreur modification catégorie:', error);
+        showAlert('Erreur lors de la modification de la catégorie', 'danger');
+    }
+}
+
+// Fonction pour supprimer une catégorie
+async function deleteCategory(categoryId, categoryName = '') {
+    const confirmMessage = categoryName 
+        ? `Êtes-vous sûr de vouloir supprimer la catégorie "${categoryName}" ?\n\nCette action est irréversible.`
+        : 'Êtes-vous sûr de vouloir supprimer cette catégorie ?\n\nCette action est irréversible.';
+    
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+    
+    try {
+        const token = adminToken || userToken;
+        const response = await fetch(`${API_BASE_URL}/admin/categories/${categoryId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            showAlert('Catégorie supprimée avec succès !', 'success');
+            // Recharger les catégories et mettre à jour les filtres
+            await loadCategories();
+            await loadAdminCategories();
+            await updateCategorySelect();
+            // Mettre à jour les compteurs
+            await updateStats();
+        } else {
+            const error = await response.json();
+            showAlert(error.error || 'Erreur lors de la suppression de la catégorie', 'danger');
+        }
+    } catch (error) {
+        console.error('Erreur suppression catégorie:', error);
+        showAlert('Erreur lors de la suppression de la catégorie', 'danger');
+    }
+}
+
 // Mise à jour des statistiques
 async function updateStats() {
     try {
         console.log('🔄 Mise à jour des statistiques...');
+        console.log('🌐 Appel API: /api/videos/stats');
         
-        // Essayer d'abord avec l'endpoint admin pour avoir toutes les vidéos
-        let allVideos = [];
-        const token = adminToken || userToken;
+        // Utiliser la nouvelle route de statistiques qui filtre automatiquement les utilisateurs bannis
+        const statsResponse = await fetch('/api/videos/stats');
         
-        if (token) {
-            // Si on a un token, essayer l'endpoint admin
-            try {
-                const adminResponse = await fetch('/api/admin/videos/all', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (adminResponse.ok) {
-                    allVideos = await adminResponse.json();
-                    console.log('📊 Toutes les vidéos récupérées via admin:', allVideos.length);
-                }
-            } catch (adminError) {
-                console.log('⚠️ Endpoint admin non disponible, essai avec endpoint public');
-            }
-        }
-        
-        // Si pas de token ou erreur admin, utiliser l'endpoint public
-        if (allVideos.length === 0) {
-            console.log('📊 Utilisation des endpoints publics pour les stats');
-            const [videosResponse, pendingResponse] = await Promise.all([
-                fetch('/api/videos'), // Vidéos validées
-                fetch('/api/videos/pending') // Vidéos en attente publiques
-            ]);
-            
-            if (!videosResponse.ok) {
-                throw new Error(`Erreur vidéos validées: ${videosResponse.status}`);
-            }
-            
-            if (!pendingResponse.ok) {
-                throw new Error(`Erreur vidéos en attente: ${pendingResponse.status}`);
-            }
-            
-            const validatedVideos = await videosResponse.json();
-            const pendingVideos = await pendingResponse.json();
-            
-            allVideos = [...validatedVideos, ...pendingVideos];
-            console.log('📊 Vidéos combinées pour stats:', allVideos.length);
-        }
-        
-        // Récupérer les catégories
-        console.log('📂 Récupération des catégories pour stats...');
-        const categoriesResponse = await fetch('/api/categories');
-        
-        if (!categoriesResponse.ok) {
-            throw new Error(`Erreur catégories: ${categoriesResponse.status}`);
-        }
-        
-        const categories = await categoriesResponse.json();
-        console.log('📂 Catégories récupérées pour stats:', categories.length);
-        
-        // Calculer les statistiques
-        const validatedCount = allVideos.filter(v => v.status === 'validated').length;
-        const pendingCount = allVideos.filter(v => v.status === 'pending').length;
-        const rejectedCount = allVideos.filter(v => v.status === 'rejected').length;
-        
-        console.log('📊 Calcul des statistiques:', {
-            total: allVideos.length,
-            validated: validatedCount,
-            pending: pendingCount,
-            rejected: rejectedCount,
-            categories: categories.length
+        console.log('📡 Réponse API stats:', {
+            status: statsResponse.status,
+            ok: statsResponse.ok,
+            statusText: statsResponse.statusText
         });
         
+        if (!statsResponse.ok) {
+            throw new Error(`Erreur statistiques: ${statsResponse.status} - ${statsResponse.statusText}`);
+        }
+        
+        const stats = await statsResponse.json();
+        console.log('📊 Statistiques récupérées (utilisateurs non bannis):', stats);
+        console.log('👥 Nombre de membres dans la réponse:', stats.members);
+        
         // Mettre à jour les compteurs
-        updateVideoCount(validatedCount);
-        updateCategoryCount(categories.length);
-        updatePendingCount(pendingCount);
+        updateVideoCount(stats.validated);
+        updateMembersCount(stats.members);
+        updatePendingCount(stats.pending);
         
         console.log('✅ Statistiques mises à jour avec succès');
     } catch (error) {
@@ -2990,13 +3957,13 @@ function updateVideoCount(count) {
     }
 }
 
-function updateCategoryCount(count) {
-    const element = document.getElementById('categoryCount');
+function updateMembersCount(count) {
+    const element = document.getElementById('membersCount');
     if (element) {
         element.textContent = count;
-        console.log('📊 Compteur catégories mis à jour:', count);
+        console.log('📊 Compteur membres mis à jour:', count);
     } else {
-        console.warn('⚠️ Élément categoryCount non trouvé');
+        console.warn('⚠️ Élément membersCount non trouvé');
     }
 }
 
@@ -3116,6 +4083,55 @@ function updateCharCounter() {
     }
 }
 
+// Fonction pour vérifier la force du mot de passe
+function checkPasswordStrength(password) {
+    let score = 0;
+    let feedback = [];
+    
+    if (password.length >= 8) score++;
+    else feedback.push('Au moins 8 caractères');
+    
+    if (/[a-z]/.test(password)) score++;
+    else feedback.push('Au moins une minuscule');
+    
+    if (/[A-Z]/.test(password)) score++;
+    else feedback.push('Au moins une majuscule');
+    
+    if (/[0-9]/.test(password)) score++;
+    else feedback.push('Au moins un chiffre');
+    
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    else feedback.push('Au moins un caractère spécial');
+    
+    return { score, feedback };
+}
+
+// Fonction pour mettre à jour l'indicateur de force du mot de passe
+function updatePasswordStrength(password) {
+    const { score, feedback } = checkPasswordStrength(password);
+    const strengthBar = document.getElementById('registerStrengthBar');
+    const strengthText = document.getElementById('registerStrengthText');
+    const strengthScore = document.getElementById('registerStrengthScore');
+    
+    if (!strengthBar || !strengthText || !strengthScore) return;
+    
+    strengthBar.className = 'strength-bar';
+    
+    if (score <= 2) {
+        strengthBar.classList.add('strength-weak');
+        strengthText.textContent = 'Faible';
+        strengthScore.textContent = `${score}/5`;
+    } else if (score <= 3) {
+        strengthBar.classList.add('strength-medium');
+        strengthText.textContent = 'Moyen';
+        strengthScore.textContent = `${score}/5`;
+    } else {
+        strengthBar.classList.add('strength-strong');
+        strengthText.textContent = 'Fort';
+        strengthScore.textContent = `${score}/5`;
+    }
+}
+
 // Fonctions globales pour les boutons admin
 window.validateVideo = async function(videoId) {
     try {
@@ -3191,10 +4207,11 @@ window.deleteCategory = async function(categoryId) {
     }
     
     try {
-        const response = await fetch(`${API_BASE_URL}/categories/admin/${categoryId}`, {
+        const token = adminToken || userToken;
+        const response = await fetch(`${API_BASE_URL}/admin/categories/${categoryId}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${adminToken}`
+                'Authorization': `Bearer ${token}`
             }
         });
         
@@ -3202,7 +4219,10 @@ window.deleteCategory = async function(categoryId) {
             showAlert('Catégorie supprimée avec succès !', 'success');
             // Recharger les catégories et mettre à jour les filtres
             await loadCategories();
-            loadAdminCategories();
+            await loadAdminCategories();
+            await updateCategorySelect();
+            // Mettre à jour les compteurs
+            await updateStats();
         } else {
             const result = await response.json();
             showAlert(result.error || 'Erreur lors de la suppression', 'danger');
@@ -3388,10 +4408,10 @@ function displayAdminPartners(partners) {
                         </a>
                     ` : ''}
                     <div class="mt-3">
-                        <button class="btn btn-sm btn-outline-primary me-2" onclick="editPartner('${partner._id}')">
+                        <button class="btn btn-sm btn-outline-primary me-2 edit-partner-btn" data-partner-id="${partner._id}">
                             <i class="fas fa-edit"></i> Modifier
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deletePartner('${partner._id}')">
+                        <button class="btn btn-sm btn-outline-danger delete-partner-btn" data-partner-id="${partner._id}">
                             <i class="fas fa-trash"></i> Supprimer
                         </button>
                     </div>
@@ -3399,10 +4419,15 @@ function displayAdminPartners(partners) {
             </div>
         </div>
     `).join('');
+    
+    // Attacher les event listeners après l'affichage
+    setTimeout(() => {
+        attachVideoEventListeners();
+    }, 100);
 }
 
 // Éditer un partenaire
-window.editPartner = function(partnerId) {
+function editPartner(partnerId) {
     console.log('✏️ Édition du partenaire:', partnerId);
     
     // Charger les données du partenaire et ouvrir le modal
@@ -3444,7 +4469,7 @@ window.editPartner = function(partnerId) {
 };
 
 // Supprimer un partenaire
-window.deletePartner = async function(partnerId) {
+async function deletePartner(partnerId) {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce partenaire ?')) {
         return;
     }
@@ -3513,17 +4538,7 @@ function resetPartnerForm() {
     console.log('🔍 partnerId après reset:', partnerIdElement ? partnerIdElement.value : 'élément non trouvé');
 }
 
-// Ajouter un nouveau partenaire
-window.addNewPartner = function() {
-    // Vider complètement le formulaire
-    document.getElementById('partnerForm').reset();
-    document.getElementById('partnerId').value = '';
-    document.getElementById('partnerModalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>Ajouter un Partenaire';
-    console.log('🧹 Formulaire vidé pour nouvel ajout');
-    
-    const modal = new bootstrap.Modal(document.getElementById('addPartnerModal'));
-    modal.show();
-}
+
 
 
 
@@ -3533,46 +4548,16 @@ window.addNewPartner = function() {
 async function handlePartnerForm(event) {
     event.preventDefault();
     
-    // Forcer une nouvelle connexion pour obtenir un token valide
-    console.log('🔄 Forçage d\'une nouvelle connexion admin...');
+    // Vérifier si nous avons déjà un token valide
+    const token = adminToken || userToken;
     
-    try {
-        // Se reconnecter avec les identifiants admin
-        const loginResponse = await fetch(`${API_BASE_URL}/users/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: 'admin@kghmedia.com',
-                password: 'admin123'
-            })
-        });
-        
-        if (loginResponse.ok) {
-            const loginData = await loginResponse.json();
-            const newToken = loginData.token;
-            
-            console.log('✅ Nouveau token obtenu:', newToken ? `${newToken.substring(0, 30)}...` : 'AUCUN');
-            
-            // Mettre à jour le token
-            userToken = newToken;
-            localStorage.setItem('userToken', newToken);
-            
-            // Mettre à jour currentUser
-            currentUser = loginData.user;
-            
-            console.log('✅ Connexion admin renouvelée');
-        } else {
-            console.log('❌ Échec de la reconnexion');
-            showAlert('Erreur lors de la reconnexion admin', 'danger');
-            return;
-        }
-    } catch (error) {
-        console.log('❌ Erreur de reconnexion:', error);
-        showAlert('Erreur lors de la reconnexion admin', 'danger');
+    if (!token) {
+        console.log('❌ Aucun token disponible');
+        showAlert('Veuillez vous connecter en tant qu\'administrateur', 'warning');
         return;
     }
+    
+    console.log('🔑 Token disponible:', token ? `${token.substring(0, 30)}...` : 'AUCUN');
     
             const partnerIdElement = document.getElementById('partnerId');
         const partnerId = partnerIdElement ? partnerIdElement.value : '';
@@ -3590,13 +4575,13 @@ async function handlePartnerForm(event) {
                 const imageFormData = new FormData();
                 imageFormData.append('profileImage', profileImageFile);
                 
-                // Utiliser le token utilisateur (qui vient d'être renouvelé)
-                console.log('🔑 Token pour upload image:', userToken ? `${userToken.substring(0, 30)}...` : 'AUCUN');
+                // Utiliser le token disponible
+                console.log('🔑 Token pour upload image:', token ? `${token.substring(0, 30)}...` : 'AUCUN');
                 
                 const imageResponse = await fetch(`${API_BASE_URL}/partners/upload-image`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${userToken}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: imageFormData
                 });
@@ -3642,15 +4627,15 @@ async function handlePartnerForm(event) {
             console.log('🌐 URL:', url);
             console.log('📡 Méthode:', method);
             
-            // Utiliser le token utilisateur (qui vient d'être renouvelé)
-            console.log('🔑 Token pour requête:', userToken ? `${userToken.substring(0, 30)}...` : 'AUCUN');
-            console.log('🔑 Token complet pour debug:', userToken);
+            // Utiliser le token disponible
+            console.log('🔑 Token pour requête:', token ? `${token.substring(0, 30)}...` : 'AUCUN');
+            console.log('🔑 Token complet pour debug: [HIDDEN]');
             
             const response = await fetch(url, {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${userToken}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(formData)
             });
@@ -3999,27 +4984,13 @@ async function displayAdminUsers(users) {
         
         return `
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100">
+                <div class="card h-100 user-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h6 class="card-title mb-0">${user.name}</h6>
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" onclick="viewUserDetails('${user._id}')">
-                                        <i class="fas fa-eye me-2"></i>Voir détails
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="viewUserPayment('${user._id}')">
-                                        <i class="fas fa-credit-card me-2"></i>Infos paiement
-                                    </a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item ${user.isBanned ? 'text-success' : 'text-danger'}" href="#" onclick="toggleUserBan('${user._id}', ${!user.isBanned})">
-                                        <i class="fas fa-${user.isBanned ? 'user-check' : 'user-slash'} me-2"></i>${user.isBanned ? 'Débannir' : 'Bannir'}
-                                    </a></li>
-                                </ul>
-                            </div>
+                            <button class="btn btn-outline-secondary btn-sm user-options-btn" type="button" data-user-id="${user._id}" data-user-name="${user.name}" data-user-email="${user.email}" data-user-banned="${user.isBanned}">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
                         </div>
                         <p class="card-text text-muted mb-2">
                             <i class="fas fa-envelope me-1"></i>${user.email}
@@ -4042,6 +5013,22 @@ async function displayAdminUsers(users) {
     
     container.innerHTML = usersHTML;
     console.log('✅ Utilisateurs affichés dans adminUsersContainer');
+    
+    // Attacher les event listeners après l'affichage
+    setTimeout(() => {
+        attachVideoEventListeners();
+        
+        // Event listeners pour les boutons d'options utilisateur
+        document.querySelectorAll('.user-options-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const userName = this.getAttribute('data-user-name');
+                const userEmail = this.getAttribute('data-user-email');
+                const isBanned = this.getAttribute('data-user-banned') === 'true';
+                showUserOptions(userId, userName, userEmail, isBanned);
+            });
+        });
+    }, 100);
 }
 
 // Fonction pour charger les utilisateurs
@@ -4175,7 +5162,7 @@ async function viewUserDetails(userId) {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <button type="button" class="btn btn-${user.isBanned ? 'success' : 'danger'}" onclick="toggleUserBan('${user._id}', ${!user.isBanned})">
+                            <button type="button" class="btn btn-${user.isBanned ? 'success' : 'danger'}" id="toggleUserBanBtn" data-user-id="${user._id}" data-is-banned="${user.isBanned}">
                                 <i class="fas fa-${user.isBanned ? 'user-check' : 'user-slash'} me-1"></i>
                                 ${user.isBanned ? 'Débannir' : 'Bannir'} l'utilisateur
                             </button>
@@ -4216,6 +5203,8 @@ async function toggleUserBan(userId, isBanned) {
         }
         
         console.log(`🔍 Tentative de ${action} utilisateur:`, userId);
+        console.log('🔑 Token utilisé:', token ? `${token.substring(0, 30)}...` : 'AUCUN');
+        console.log('🌐 URL appelée:', `${API_BASE_URL}/admin/users/${userId}/ban`);
         
         const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/ban`, {
             method: 'PATCH',
@@ -4226,8 +5215,11 @@ async function toggleUserBan(userId, isBanned) {
             body: JSON.stringify({ isBanned })
         });
         
+        console.log('📡 Réponse serveur:', response.status, response.statusText);
+        
         if (response.ok) {
             const result = await response.json();
+            console.log('✅ Réponse de succès:', result);
             showAlert(result.message, 'success');
             
             // Recharger la liste des utilisateurs
@@ -4249,6 +5241,9 @@ async function toggleUserBan(userId, isBanned) {
             if (typeof loadRecentVideos === 'function') {
                 loadRecentVideos();
             }
+            
+            // Mettre à jour les statistiques
+            await updateStats();
         } else {
             const error = await response.json();
             console.error('❌ Erreur serveur:', error);
@@ -4257,6 +5252,63 @@ async function toggleUserBan(userId, isBanned) {
     } catch (error) {
         console.error('❌ Erreur modification statut ban:', error);
         showAlert('Erreur lors de l\'opération', 'danger');
+    }
+}
+
+// Fonction pour supprimer un utilisateur
+async function deleteUser(userId, userName, userEmail) {
+    const confirmMessage = `⚠️ ATTENTION : Êtes-vous sûr de vouloir supprimer définitivement l'utilisateur "${userName}" (${userEmail}) ?\n\nCette action est irréversible et supprimera :\n• Le compte utilisateur\n• Toutes ses vidéos\n• Toutes ses données\n\nCette action ne peut pas être annulée !`;
+    
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+    
+    try {
+        const token = adminToken || userToken;
+        if (!token) {
+            showAlert('Token admin manquant', 'danger');
+            return;
+        }
+        
+        console.log(`🗑️ Suppression de l'utilisateur:`, userId, userName, userEmail);
+        console.log('🔑 Token utilisé:', token ? `${token.substring(0, 30)}...` : 'AUCUN');
+        console.log('🌐 URL appelée:', `${API_BASE_URL}/admin/users/${userId}`);
+        
+        const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        console.log('📡 Réponse serveur:', response.status, response.statusText);
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Réponse de succès:', result);
+            showAlert(`Utilisateur "${userName}" supprimé avec succès ! Toutes ses vidéos ont également été supprimées.`, 'success');
+            
+            // Recharger la liste des utilisateurs
+            await loadAdminUsers();
+            
+            // Mettre à jour les statistiques (compteur de membres)
+            await updateStats();
+            
+            // Recharger les vidéos publiques
+            await loadVideos();
+            
+            // Mettre à jour les statistiques
+            await updateStats();
+            
+            console.log('✅ Utilisateur supprimé avec succès');
+        } else {
+            const error = await response.json();
+            console.error('❌ Erreur serveur:', error);
+            showAlert(error.error || 'Erreur lors de la suppression', 'danger');
+        }
+    } catch (error) {
+        console.error('❌ Erreur suppression utilisateur:', error);
+        showAlert('Erreur lors de la suppression de l\'utilisateur', 'danger');
     }
 }
 
@@ -4462,4 +5514,101 @@ async function viewUserPayment(userId) {
         console.error('❌ Erreur affichage paiement utilisateur:', error);
         showAlert('Erreur lors du chargement des informations de paiement', 'danger');
     }
+}
+
+// Fonction pour afficher les options utilisateur dans un modal
+function showUserOptions(userId, userName, userEmail, isBanned) {
+    // Créer le modal
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'userOptionsModal';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">
+                        <i class="fas fa-cog me-2"></i>Options pour ${userName}
+                    </h6>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm user-details-btn" data-user-id="${userId}">
+                            <i class="fas fa-eye me-2"></i>Voir détails
+                        </button>
+                        <button type="button" class="btn btn-outline-info btn-sm user-payment-btn" data-user-id="${userId}">
+                            <i class="fas fa-credit-card me-2"></i>Infos paiement
+                        </button>
+                        <hr>
+                        <button type="button" class="btn btn-outline-${isBanned ? 'success' : 'warning'} btn-sm user-ban-btn" data-user-id="${userId}" data-is-banned="${isBanned}">
+                            <i class="fas fa-${isBanned ? 'user-check' : 'user-slash'} me-2"></i>${isBanned ? 'Débannir' : 'Bannir'}
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm user-delete-btn" data-user-id="${userId}" data-user-name="${userName}" data-user-email="${userEmail}">
+                            <i class="fas fa-trash me-2"></i>Supprimer définitivement
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Ajouter le modal au body et l'afficher
+    document.body.appendChild(modal);
+    const modalInstance = new bootstrap.Modal(modal);
+    modalInstance.show();
+    
+    // Ajouter les event listeners pour les boutons du modal
+    setTimeout(() => {
+        // Voir détails
+        const detailsBtn = modal.querySelector('.user-details-btn');
+        if (detailsBtn) {
+            detailsBtn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                viewUserDetails(userId);
+                modalInstance.hide();
+            });
+        }
+        
+        // Infos paiement
+        const paymentBtn = modal.querySelector('.user-payment-btn');
+        if (paymentBtn) {
+            paymentBtn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                viewUserPayment(userId);
+                modalInstance.hide();
+            });
+        }
+        
+        // Bannir/Débannir
+        const banBtn = modal.querySelector('.user-ban-btn');
+        if (banBtn) {
+            banBtn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const currentIsBanned = this.getAttribute('data-is-banned') === 'true';
+                // Inverser le statut : si actuellement banni, on débannit, sinon on bannit
+                const newIsBanned = !currentIsBanned;
+                toggleUserBan(userId, newIsBanned);
+                modalInstance.hide();
+            });
+        }
+        
+        // Supprimer
+        const deleteBtn = modal.querySelector('.user-delete-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const userName = this.getAttribute('data-user-name');
+                const userEmail = this.getAttribute('data-user-email');
+                deleteUser(userId, userName, userEmail);
+                modalInstance.hide();
+            });
+        }
+    }, 100);
+    
+    // Nettoyer le modal après fermeture
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
 }

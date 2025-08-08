@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification Email - DROLE MEDIA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .verification-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        .verification-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+        .loading-spinner {
+            display: none;
+        }
+        .alert {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="verification-card">
+            <div class="verification-icon">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+            
+            <h2 class="mb-4">Vérification automatique de votre email</h2>
+            
+            <div id="loadingMessage" class="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-3">Vérification en cours...</p>
+            </div>
+            
+            <div id="successMessage" class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span id="successText"></span>
+            </div>
+            
+            <div id="errorMessage" class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span id="errorText"></span>
+            </div>
+            
+            <div id="expiredMessage" class="alert alert-warning" role="alert">
+                <i class="fas fa-clock me-2"></i>
+                <span>Ce lien de vérification a expiré. Veuillez vous inscrire à nouveau.</span>
+                <br><br>
+                <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+            </div>
+            
+            <div id="verificationForm" style="display: none;">
+                <p class="text-muted mb-4">
+                    Vérification automatique en cours...
+                </p>
+                <button id="confirmButton" class="btn btn-success btn-lg" disabled>
+                    <i class="fas fa-spinner fa-spin me-2"></i>Vérification...
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Récupérer le token depuis l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        
+        if (!token) {
+            showError('Lien de vérification invalide. Veuillez vérifier votre email.');
+            return;
+        }
+        
+        // Vérifier automatiquement le compte dès le chargement de la page
+        async function verifyAccount() {
+            // Afficher le loading
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('verificationForm').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/auth/verify-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('Votre email a été vérifié avec succès ! Vous pouvez maintenant vous connecter.');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
+                } else {
+                    if (result.error === 'TOKEN_EXPIRED') {
+                        showExpired();
+                    } else {
+                        showError(result.error || 'Erreur lors de la vérification');
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur de connexion. Veuillez réessayer.');
+            }
+        }
+        
+        // Lancer la vérification automatiquement
+        verifyAccount();
+        
+        function showSuccess(message) {
+            document.getElementById('verificationForm').style.display = 'none';
+            document.getElementById('successText').textContent = message;
+            document.getElementById('successMessage').style.display = 'block';
+        }
+        
+        function showError(message) {
+            document.getElementById('verificationForm').style.display = 'none';
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+        
+        function showExpired() {
+            document.getElementById('verificationForm').style.display = 'none';
+            document.getElementById('expiredMessage').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

@@ -55,8 +55,8 @@
     <!-- Section Accueil -->
     <section id="home" class="hero-section">
         <div class="container text-center">
-            <h1 class="display-4 mb-4">Partagez vos vidéos</h1>
-            <p class="lead mb-5">Découvrez et partagez les meilleures vidéos Francophones !</p>
+            <h1 class="display-4 mb-4">Protéger, Partager, Gagner.</h1>
+            <p class="lead mb-5">Découvrez les meilleures vidéos Francophones sur DROLE MEDIA !</p>
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="stats-container">
@@ -71,8 +71,8 @@
                             <div class="col-md-4">
                                 <div class="stat-card">
                                     <i class="fas fa-users fa-2x mb-3"></i>
-                                    <h3 id="categoryCount">0</h3>
-                                    <p>Catégories</p>
+                                    <h3 id="membersCount">0</h3>
+                                    <p>Membres</p>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -95,7 +95,7 @@
         <div class="container">
             <div class="categories-nav text-center">
                 <h4><i class="fas fa-book"></i> Bibliothèque</h4>
-                <p class="text-muted">Découvrez toutes nos vidéos approuvées</p>
+                <p class="text-muted">Découvrez toutes nos vidéos virales :</p>
                 <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#libraryModal">
                     <i class="fas fa-play-circle me-2"></i>Ouvrir la Bibliothèque
                 </button>
@@ -210,7 +210,7 @@
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" id="termsAgreement" required>
                                                 <label class="form-check-label" for="termsAgreement">
-                                                    J'accepte les <strong><u><a href="#" onclick="openTermsModal()" class="terms-link">Conditions de soumission</a></u></strong> et la <strong><u><a href="#" onclick="openPrivacyModal()" class="terms-link">Politique de confidentialité</a></u></strong> 
+                                                    J'accepte les <strong><u><a href="#" id="termsLink" class="terms-link">Conditions de soumission</a></u></strong> et la <strong><u><a href="#" id="privacyLink" class="terms-link">Politique de confidentialité</a></u></strong> 
                                                     et certifie par la présente que toutes les informations fournies ci-dessus sont complètes et exactes.
                                                 </label>
                                             </div>
@@ -229,9 +229,11 @@
                                 <div class="progress mb-3" style="display: none;">
                                     <div class="progress-bar" role="progressbar" style="width: 0%"></div>
                                 </div>
+                                <div class="text-center">
                                 <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="fas fa-upload me-2"></i>Soumettre la vidéo
                                 </button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -286,8 +288,17 @@
                                     <input type="password" class="form-control" id="loginPassword" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100 mb-3">Se connecter</button>
+                                
+                                <!-- Bouton de renvoi d'email de vérification -->
+                                <div class="text-center mb-3" id="resendEmailSection" style="display: none;">
+                                    <button type="button" class="btn btn-outline-warning btn-sm" id="resendEmailBtn" data-action="resend-verification">
+                                        <i class="fas fa-envelope me-1"></i>Renvoyer l'email de vérification
+                                        <span id="resendTimer"></span>
+                                    </button>
+                                </div>
+                                
                                 <div class="text-center">
-                                    <button type="button" class="btn btn-link text-decoration-none" onclick="showForgotPassword()">
+                                    <button type="button" class="btn btn-link text-decoration-none" id="forgotPasswordBtn">
                                         <i class="fas fa-key me-1"></i>Mot de passe oublié ?
                                     </button>
                                 </div>
@@ -308,6 +319,13 @@
                                 <div class="mb-3">
                                     <label for="registerPassword" class="form-label">Mot de passe</label>
                                     <input type="password" class="form-control" id="registerPassword" required>
+                                    <div class="password-strength mt-2">
+                                        <div class="d-flex justify-content-between">
+                                            <span id="registerStrengthText" class="small text-muted">Force du mot de passe</span>
+                                            <span id="registerStrengthScore" class="small text-muted"></span>
+                                        </div>
+                                        <div class="strength-bar" id="registerStrengthBar"></div>
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="confirmPassword" class="form-label">Confirmer le mot de passe</label>
@@ -361,7 +379,7 @@
                                 <i class="fas fa-info-circle me-2"></i>
                                 Vérifiez votre boîte de réception et vos spams.
                             </div>
-                            <button type="button" class="btn btn-secondary" onclick="closeForgotPasswordModal()">
+                            <button type="button" class="btn btn-secondary" id="closeForgotPasswordBtn">
                                 <i class="fas fa-times me-2"></i>Fermer
                             </button>
                         </div>
@@ -387,7 +405,7 @@
                     </div>
                 </div>
                 <div class="modal-body">
-                    <ul class="nav nav-tabs" id="adminTabs">
+                    <ul class="nav nav-tabs mb-3" id="adminTabs">
                         <li class="nav-item">
                             <a class="nav-link active" data-bs-toggle="tab" href="#pendingVideos">Vidéos en attente</a>
                         </li>
@@ -415,7 +433,7 @@
                                 <h6><i class="fas fa-check-circle me-2 text-success"></i>Vidéos Approuvées</h6>
                                 <div class="input-group" style="max-width: 300px;">
                                     <input type="text" class="form-control" id="searchApproved" placeholder="Rechercher une vidéo...">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="searchApprovedVideos()">
+                                    <button class="btn btn-outline-secondary" type="button" id="searchApprovedVideosBtn">
                                         <i class="fas fa-search"></i>
                                     </button>
                                 </div>
@@ -481,7 +499,7 @@
                                     <h6><i class="fas fa-handshake me-2"></i>Gestion des Partenaires</h6>
                                 </div>
                                 <div class="col-md-4 text-end">
-                                    <button class="btn btn-primary btn-sm" onclick="addNewPartner()">
+                                    <button class="btn btn-primary btn-sm" id="addPartnerBtn">
                                         <i class="fas fa-plus me-1"></i>Ajouter un partenaire
                                     </button>
                                 </div>
@@ -500,7 +518,7 @@
                                 <div class="col-md-4 text-end">
                                     <div class="input-group">
                                         <input type="text" class="form-control" id="userSearch" placeholder="Rechercher un utilisateur...">
-                                        <button class="btn btn-outline-secondary" type="button" onclick="searchUsers()">
+                                        <button class="btn btn-outline-secondary" type="button" id="searchUsersBtn">
                                             <i class="fas fa-search"></i>
                                         </button>
                                     </div>
@@ -797,7 +815,7 @@
                         <div class="col-md-6 mx-auto">
                             <div class="input-group">
                                 <input type="text" class="form-control" id="librarySearch" placeholder="Rechercher une vidéo...">
-                                <button class="btn btn-outline-secondary" type="button" onclick="searchLibraryVideos()">
+                                <button class="btn btn-outline-secondary" type="button" id="searchLibraryVideosBtn">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </div>
@@ -856,16 +874,16 @@
                         <div class="col-md-6">
                             <h6><i class="fas fa-info-circle me-2"></i>Informations de contact</h6>
                             <div class="contact-info">
-                                <p><i class="fas fa-envelope me-2"></i><strong>Email :</strong> contact@drolemedia.com</p>
+                                <p><i class="fas fa-envelope me-2"></i><strong>Email :</strong> u0072585458@gmail.com</p>
                             </div>
                             
                             <div class="mt-4">
                                 <h6><i class="fas fa-share-alt me-2"></i>Suivez-nous</h6>
                                 <div class="social-links">
-                                    <a href="#" class="btn btn-outline-danger btn-sm me-2">
+                                    <a href="https://www.instagram.com/drole" target="_blank" class="btn btn-outline-danger btn-sm me-2">
                                         <i class="fab fa-instagram"></i> Instagram
                                     </a>
-                                    <a href="#" class="btn btn-outline-dark btn-sm">
+                                    <a href="https://www.tiktok.com/@drole" target="_blank" class="btn btn-outline-dark btn-sm">
                                         <i class="fab fa-tiktok"></i> TikTok
                                     </a>
                                 </div>
@@ -1037,10 +1055,59 @@
                 </div>
                 <div class="modal-body">
                     <div id="termsContent">
-                        <p class="text-muted text-center">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Le contenu des conditions de soumission sera ajouté prochainement.
-                        </p>
+                        <h6 class="mb-3">1. Objet</h6>
+                        <p>Les présentes conditions encadrent la soumission de contenus (vidéos, images, sons…) par les utilisateurs (ci-après le « Concédant ») à DROLE Media (ci-après « Nous » ou « DROLE Media »), à des fins de diffusion, monétisation et exploitation sur nos supports numériques et ceux de nos partenaires.</p>
+
+                        <h6 class="mb-3">2. Cession de droits</h6>
+                        <p>En soumettant un contenu à DROLE Media, vous nous accordez à titre gratuit, non exclusif, mondial et pour une durée de 5 ans renouvelable automatiquement :</p>
+                        <ul>
+                            <li>Le droit de diffuser le contenu sur nos réseaux sociaux, plateformes partenaires, site web, ou tout autre support numérique ou audiovisuel,</li>
+                            <li>Le droit de le modifier (recadrage, ajout de logo, sous-titrage, traduction, voix off, montage),</li>
+                            <li>Le droit de le monétiser (publicité, sponsoring, compilations, cession à des partenaires médias),</li>
+                            <li>Le droit de le traduire, adapter et sous-titrer.</li>
+                        </ul>
+                        <p><strong>✅ Vous restez pleinement propriétaire de votre contenu, sauf si un contrat de cession exclusive est signé séparément.</strong></p>
+
+                        <h6 class="mb-3">3. Engagements du Concédant</h6>
+                        <p>En soumettant un contenu, vous garantissez que :</p>
+                        <ul>
+                            <li>Vous êtes le créateur ou le détenteur légal des droits du contenu,</li>
+                            <li>Vous avez obtenu les autorisations des personnes identifiables dans la vidéo,</li>
+                            <li>Le contenu ne viole aucun droit d'auteur, à l'image, à la vie privée ou autre,</li>
+                            <li>Le contenu ne contrevient pas à la loi française (violence, haine, discrimination…).</li>
+                        </ul>
+                        <p><strong>👉 En cas de litige, vous vous engagez à nous indemniser pour tout préjudice lié à une violation de ces garanties.</strong></p>
+
+                        <h6 class="mb-3">4. Monétisation & rétribution</h6>
+                        <ul>
+                            <li>Si le contenu est monétisé, vous percevrez <strong>50 % des revenus nets</strong> générés (après frais techniques, commissions, etc.).</li>
+                            <li>Le paiement est effectué dès que le seuil de <strong>50 €</strong> est atteint.</li>
+                            <li>Paiements par virement bancaire ou PayPal (frais à votre charge).</li>
+                            <li>Si le contenu n'est pas monétisé, aucun paiement ne sera dû.</li>
+                        </ul>
+                        <p><strong>ℹ️ Vous pouvez demander à tout moment un relevé des revenus liés à votre contenu.</strong></p>
+
+                        <h6 class="mb-3">5. Retrait du contenu</h6>
+                        <p>Vous pouvez demander à tout moment le retrait de votre contenu, sauf si :</p>
+                        <ul>
+                            <li>Un contrat exclusif a été signé,</li>
+                            <li>Le contenu a été intégré à une production commerciale ou vendu à un partenaire.</li>
+                        </ul>
+                        <p>Dans tous les cas, nous nous engageons à traiter votre demande dans un délai raisonnable.</p>
+
+                        <h6 class="mb-3">6. Durée de la licence</h6>
+                        <p>La licence est accordée pour <strong>5 ans</strong> à compter de la date de soumission, renouvelable automatiquement, sauf demande écrite de retrait.</p>
+
+                        <h6 class="mb-3">7. Loi applicable & juridiction</h6>
+                        <p>Les présentes conditions sont régies par le <strong>droit français</strong>.<br>
+                        Tout litige relèvera des tribunaux français, notamment du tribunal compétent au lieu de domiciliation de DROLE Media.</p>
+
+                        <h6 class="mb-3">8. Acceptation</h6>
+                        <p>En soumettant votre contenu (via formulaire, e-mail ou message privé), vous reconnaissez avoir lu, compris et accepté l'intégralité des présentes Conditions Générales de Soumission.</p>
+
+                        <h6 class="mb-3">9. Contact</h6>
+                        <p><strong>📧 Pour toute question ou demande de retrait :</strong><br>
+                        <a href="mailto:u0072585458@gmail.com">u0072585458@gmail.com</a></p>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1062,10 +1129,148 @@
                 </div>
                 <div class="modal-body">
                     <div id="privacyContent">
-                        <p class="text-muted text-center">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Le contenu de la politique de confidentialité sera ajouté prochainement.
-                        </p>
+                        <h6 class="mb-3">🧾 Introduction</h6>
+                        <p>Chez DROLE Media, nous respectons votre vie privée et nous engageons à protéger les données personnelles que vous nous transmettez, en conformité avec le Règlement Général sur la Protection des Données (RGPD) et la législation française en vigueur.</p>
+
+                        <p>La présente Politique de Confidentialité a pour objectif de vous expliquer :</p>
+                        <ul>
+                            <li>quelles données personnelles nous collectons,</li>
+                            <li>dans quelles conditions nous les utilisons,</li>
+                            <li>avec qui nous pouvons les partager,</li>
+                            <li>comment nous les protégeons,</li>
+                            <li>et quels sont vos droits.</li>
+                        </ul>
+
+                        <p>Elle s'applique à l'ensemble des données que vous nous fournissez :</p>
+                        <ul>
+                            <li>lors de la soumission de contenus (vidéos, images, sons…),</li>
+                            <li>via notre site web, nos réseaux sociaux, nos formulaires ou par e-mail/message privé,</li>
+                            <li>ainsi que lors de vos interactions avec notre contenu en ligne ou nos services.</li>
+                        </ul>
+
+                        <p>En soumettant votre contenu ou en utilisant nos services, vous acceptez les conditions de cette politique.<br>
+                        Si vous êtes en désaccord, vous pouvez à tout moment choisir de ne pas soumettre de données ou nous contacter à <a href="mailto:u0072585458@gmail.com">u0072585458@gmail.com</a>.</p>
+
+                        <h6 class="mb-3">1. 📌 Champ d'application</h6>
+                        <p>Cette politique s'applique à toutes les données personnelles que nous collectons ou recevons, notamment lorsque vous :</p>
+                        <ul>
+                            <li>accédez à notre site web ou à nos réseaux sociaux,</li>
+                            <li>interagissez avec nous par e-mail, message privé ou formulaire,</li>
+                            <li>soumettez un contenu pour diffusion ou monétisation,</li>
+                            <li>participez à des échanges ou transactions avec DROLE Media.</li>
+                        </ul>
+                        <p>Elle ne s'applique pas aux services ou plateformes externes (ex. : PayPal, Google, Facebook) que vous utilisez via nos contenus.</p>
+
+                        <h6 class="mb-3">2. 📥 Données collectées</h6>
+                        <p><strong>a. Données que vous fournissez volontairement :</strong></p>
+                        <ul>
+                            <li>Nom ou pseudonyme,</li>
+                            <li>Adresse e-mail,</li>
+                            <li>Coordonnées PayPal ou bancaires pour les paiements,</li>
+                            <li>Liens vers vos contenus ou fichiers envoyés,</li>
+                            <li>Messages, informations ou justificatifs fournis via nos formulaires ou notre adresse email.</li>
+                        </ul>
+
+                        <p><strong>b. Données collectées automatiquement :</strong></p>
+                        <ul>
+                            <li>Adresse IP,</li>
+                            <li>Type d'appareil, navigateur, système d'exploitation,</li>
+                            <li>Données d'usage du site (pages visitées, temps de navigation, clics…),</li>
+                            <li>Cookies, balises web, pixels de suivi.</li>
+                        </ul>
+
+                        <h6 class="mb-3">3. 🎯 Finalités du traitement</h6>
+                        <p>Nous utilisons vos données pour :</p>
+                        <ul>
+                            <li>Gérer vos soumissions de contenu (identification, traitement, communication),</li>
+                            <li>Diffuser, modifier et monétiser vos contenus selon les CG de soumission,</li>
+                            <li>Vous contacter en lien avec votre contenu ou vos revenus,</li>
+                            <li>Effectuer les paiements et tenir une comptabilité,</li>
+                            <li>Améliorer nos services et l'expérience utilisateur,</li>
+                            <li>Analyser l'audience et optimiser notre communication,</li>
+                            <li>Prévenir les fraudes, abus ou activités illégales,</li>
+                            <li>Respecter nos obligations légales.</li>
+                        </ul>
+                        <p><strong>Vos données ne sont pas revendues à des tiers.</strong></p>
+
+                        <h6 class="mb-3">4. ⚖️ Base légale du traitement</h6>
+                        <p>Conformément au RGPD, nos traitements sont basés sur :</p>
+                        <ul>
+                            <li>Votre consentement (ex. : soumission d'un contenu),</li>
+                            <li>L'exécution d'un contrat (les CG de soumission),</li>
+                            <li>Notre intérêt légitime (ex. : prévention des abus, amélioration du service),</li>
+                            <li>Nos obligations légales (fiscales, comptables, etc.).</li>
+                        </ul>
+
+                        <h6 class="mb-3">5. 👥 Destinataires des données</h6>
+                        <p>Vos données personnelles peuvent être transmises à :</p>
+                        <ul>
+                            <li>Nos outils et prestataires techniques (hébergeur, solutions e-mailing, analytics, etc.),</li>
+                            <li>Nos prestataires de paiement (PayPal, virement bancaire),</li>
+                            <li>Les plateformes de diffusion (réseaux sociaux, partenaires),</li>
+                            <li>Les autorités compétentes en cas de réquisition ou obligation légale.</li>
+                        </ul>
+                        <p>Nous veillons à ce que tous les sous-traitants respectent le RGPD et la confidentialité de vos données.</p>
+
+                        <h6 class="mb-3">6. 🍪 Cookies et technologies de suivi</h6>
+                        <p>Nous utilisons des cookies pour :</p>
+                        <ul>
+                            <li>Analyser le trafic du site,</li>
+                            <li>Améliorer la navigation et l'expérience utilisateur,</li>
+                            <li>Personnaliser les contenus proposés.</li>
+                        </ul>
+
+                        <p>Vous pouvez à tout moment :</p>
+                        <ul>
+                            <li>refuser les cookies via les paramètres de votre navigateur,</li>
+                            <li>supprimer les cookies déjà enregistrés,</li>
+                            <li>désactiver le suivi (ex. : extensions, mode navigation privée).</li>
+                        </ul>
+                        <p>Cela peut cependant limiter certaines fonctionnalités du site.</p>
+
+                        <h6 class="mb-3">7. 🗃️ Durée de conservation</h6>
+                        <p>Nous conservons vos données :</p>
+                        <ul>
+                            <li>Pendant toute la durée d'exploitation du contenu (5 ans renouvelables),</li>
+                            <li>Le temps nécessaire au respect de nos obligations légales,</li>
+                            <li>Jusqu'à votre demande de suppression, si elle est possible dans le cadre de nos CG.</li>
+                        </ul>
+                        <p>Les données inutilisées sont supprimées ou anonymisées dans des délais raisonnables.</p>
+
+                        <h6 class="mb-3">8. ✅ Vos droits</h6>
+                        <p>Conformément au RGPD, vous disposez des droits suivants :</p>
+                        <ul>
+                            <li>Droit d'accès à vos données,</li>
+                            <li>Droit de rectification en cas d'erreur,</li>
+                            <li>Droit à l'effacement (« droit à l'oubli »),</li>
+                            <li>Droit d'opposition au traitement,</li>
+                            <li>Droit à la portabilité de vos données,</li>
+                            <li>Droit de retirer votre consentement à tout moment.</li>
+                        </ul>
+                        <p><strong>📧 Pour exercer vos droits, contactez-nous à : <a href="mailto:u0072585458@gmail.com">u0072585458@gmail.com</a></strong><br>
+                        Nous répondrons sous 30 jours maximum.</p>
+
+                        <h6 class="mb-3">9. 🚫 Données des mineurs</h6>
+                        <p>Nos services ne sont pas destinés aux mineurs de moins de 13 ans.<br>
+                        Nous ne collectons pas sciemment de données concernant des enfants.<br>
+                        Si vous êtes parent ou représentant légal et pensez qu'un mineur nous a transmis des données, contactez-nous immédiatement.</p>
+
+                        <h6 class="mb-3">10. 🔐 Sécurité des données</h6>
+                        <p>Nous mettons en œuvre des mesures techniques et organisationnelles pour :</p>
+                        <ul>
+                            <li>Protéger vos données contre les accès non autorisés, la perte ou la divulgation,</li>
+                            <li>Sécuriser les échanges de données via des services conformes (emails, paiements, hébergements sécurisés).</li>
+                        </ul>
+                        <p><strong>⚠️ Toutefois, aucun système n'est infaillible. La transmission de données via Internet comporte toujours un risque.</strong></p>
+
+                        <h6 class="mb-3">11. 🛠️ Modifications de la politique</h6>
+                        <p>Nous pouvons modifier cette politique à tout moment.<br>
+                        Les changements seront publiés sur cette page avec une date de mise à jour.<br>
+                        Nous vous encourageons à consulter régulièrement cette page.</p>
+
+                        <h6 class="mb-3">12. 📫 Contact</h6>
+                        <p><strong>Pour toute question, demande liée à vos données personnelles ou exercice de vos droits :</strong><br>
+                        📧 <a href="mailto:u0072585458@gmail.com">u0072585458@gmail.com</a></p>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1075,6 +1280,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=1.2"></script>
+    <script src="app.js?v=1.3"></script>
+    <script src="debug_videos.js"></script>
 </body>
 </html> 

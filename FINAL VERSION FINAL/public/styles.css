@@ -23,6 +23,21 @@
     --dark-blue: #004085;
 }
 
+/* Styles pour l'indicateur de force du mot de passe */
+.password-strength {
+    margin-top: 10px;
+    font-size: 12px;
+}
+.strength-bar {
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 5px;
+    transition: all 0.3s ease;
+}
+.strength-weak { background: #dc3545; }
+.strength-medium { background: #ffc107; }
+.strength-strong { background: #28a745; }
+
 /* Styles spécifiques pour les droits d'auteur */
 .copyright-header {
     color: #000000 !important;
@@ -356,13 +371,36 @@ video::-webkit-media-controls-panel {
     box-shadow: none !important;
 }
 
-/* Amélioration de la lisibilité des onglets inactifs */
+/* Harmonisation avec le style du panel utilisateur */
 #adminPanelModal .nav-tabs .nav-link:not(.active) {
+    color: var(--text-color);
+    font-weight: 500;
+    background: transparent;
+    border: none !important;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+#adminPanelModal .nav-tabs .nav-link:not(.active):hover {
+    color: var(--text-color);
+    background: var(--btn-hover);
+    color: white;
+    opacity: 1;
+}
+
+/* Mode sombre pour les onglets inactifs */
+.dark-mode #adminPanelModal .nav-tabs .nav-link:not(.active) {
     color: #ffffff !important;
     text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-    font-weight: 500;
     background: rgba(255,255,255,0.1);
     backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.dark-mode #adminPanelModal .nav-tabs .nav-link:not(.active):hover {
+    color: #ffffff !important;
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.3);
 }
 
 /* Correction du positionnement bizarre de "Mes Vidéos" dans le dashboard utilisateur */
@@ -611,12 +649,15 @@ body {
     height: 120px;
     overflow: hidden;
     cursor: pointer;
+    background: #000;
+    border-radius: 8px;
 }
 
 .library-video-thumbnail video {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    background: #000;
 }
 
 .library-play-overlay {
@@ -1162,10 +1203,11 @@ textarea:focus {
 .video-thumbnail video {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: var(--border-radius) var(--border-radius) 0 0;
     transition: transform 0.3s ease;
     display: block;
+    background: #000;
 }
 
 .video-card:hover .video-thumbnail video {
@@ -1723,11 +1765,11 @@ section + section {
     border: none !important;
     border-radius: 8px 8px 0 0;
     margin-right: 5px;
-    color: #ffffff !important;
-    opacity: 0.9;
+    color: var(--text-color);
+    opacity: 0.7;
     transition: all 0.3s ease;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
     font-weight: 500;
+    background: transparent;
 }
 
 #adminPanelModal .nav-tabs .nav-link.active {
@@ -1743,7 +1785,6 @@ section + section {
     opacity: 1;
     background: var(--btn-hover);
     color: white !important;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
 }
 
 .btn-close {
@@ -1760,6 +1801,211 @@ section + section {
 }
 
 /* Responsive */
+/* Styles pour le bouton menu mobile */
+.navbar-toggler {
+    border: 2px solid var(--text-color) !important;
+    border-radius: 8px !important;
+    padding: 6px 8px !important;
+    background: var(--card-bg) !important;
+    transition: all 0.3s ease;
+}
+
+.navbar-toggler:hover {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    transform: scale(1.05);
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+
+/* Mode sombre - icône blanche */
+.dark-mode .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Amélioration du menu déroulant mobile */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        background: var(--card-bg) !important;
+        border-radius: 12px !important;
+        margin-top: 10px !important;
+        padding: 15px !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+        border: 1px solid var(--input-border) !important;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 12px 15px !important;
+        border-radius: 8px !important;
+        margin: 3px 0 !important;
+        transition: all 0.3s ease !important;
+        color: var(--text-color) !important;
+    }
+    
+    .navbar-nav .nav-link:hover {
+        background: var(--primary-color) !important;
+        color: white !important;
+        transform: translateX(5px) !important;
+    }
+    
+    .navbar-nav .nav-link.active {
+        background: var(--primary-color) !important;
+        color: white !important;
+    }
+}
+
+/* Styles pour les dropdowns dans le dashboard admin */
+.dropdown-menu {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    border-radius: var(--border-radius) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+    padding: 8px 0 !important;
+    min-width: 200px !important;
+    z-index: 1050 !important;
+    position: absolute !important;
+    margin-top: 5px !important;
+    overflow: visible !important;
+}
+
+/* Permettre aux dropdowns de déborder de leurs conteneurs */
+.card {
+    overflow: visible !important;
+}
+
+.card-body {
+    overflow: visible !important;
+}
+
+.col-md-6, .col-lg-4 {
+    overflow: visible !important;
+}
+
+/* Correction spécifique pour les cartes utilisateur */
+#adminUsersContainer .card {
+    overflow: visible !important;
+}
+
+#adminUsersContainer .card-body {
+    overflow: visible !important;
+}
+
+#adminUsersContainer .col-md-6,
+#adminUsersContainer .col-lg-4 {
+    overflow: visible !important;
+}
+
+/* Correction forcée pour tous les conteneurs de dropdown */
+.modal {
+    overflow: visible !important;
+}
+
+.modal-content {
+    overflow: visible !important;
+}
+
+.modal-body {
+    overflow: visible !important;
+}
+
+.tab-pane {
+    overflow: visible !important;
+}
+
+.row {
+    overflow: visible !important;
+}
+
+/* Correction spécifique pour le conteneur des utilisateurs */
+#adminUsersContainer {
+    overflow: visible !important;
+}
+
+#adminUsersContainer * {
+    overflow: visible !important;
+}
+
+/* Plus besoin de règles CSS complexes pour les dropdowns */
+
+/* Correction pour les cartes utilisateur spécifiquement */
+#adminUsersContainer .card,
+#adminUsersContainer .card-body,
+#adminUsersContainer .col-md-6,
+#adminUsersContainer .col-lg-4,
+#adminUsersContainer .dropdown {
+    overflow: visible !important;
+    position: relative !important;
+}
+
+.dropdown-item {
+    color: var(--text-color) !important;
+    padding: 10px 20px !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.dropdown-item:hover {
+    background: var(--primary-color) !important;
+    color: var(--secondary-color) !important;
+    transform: translateX(3px) !important;
+}
+
+.dropdown-item.text-danger {
+    color: #dc3545 !important;
+}
+
+.dropdown-item.text-danger:hover {
+    background: #dc3545 !important;
+    color: white !important;
+}
+
+.dropdown-item.text-success {
+    color: #28a745 !important;
+}
+
+.dropdown-item.text-success:hover {
+    background: #28a745 !important;
+    color: white !important;
+}
+
+.dropdown-divider {
+    border-color: var(--input-border) !important;
+    margin: 5px 0 !important;
+}
+
+/* Mode sombre pour les dropdowns */
+.dark-mode .dropdown-menu {
+    background: var(--card-bg) !important;
+    border-color: var(--input-border) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important;
+}
+
+.dark-mode .dropdown-item {
+    color: var(--text-color) !important;
+}
+
+.dark-mode .dropdown-item:hover {
+    background: var(--primary-color) !important;
+    color: var(--secondary-color) !important;
+}
+
+/* Correction du z-index pour les dropdowns dans les modals */
+.modal .dropdown-menu {
+    z-index: 1060 !important;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .hero-section {
