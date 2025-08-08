@@ -391,9 +391,11 @@ async function checkAuthStatus() {
     console.log('🔑 userToken:', userToken ? 'Présent' : 'Absent');
     
     // Le lien "Soumettre" doit toujours être visible
-    const submitLink = document.querySelector('a[href="#submit"]');
+    const submitLink = document.querySelector('#submitButton') || document.querySelector('a[href="#submit"]');
     if (submitLink) {
         submitLink.style.display = 'inline-block';
+        submitLink.style.visibility = 'visible';
+        submitLink.style.opacity = '1';
     }
     
     // Vérifier les paramètres de vérification dans l'URL
@@ -497,9 +499,11 @@ function updateUIForAuthenticatedUser() {
     }
     
     // Le lien "Soumettre" doit toujours être visible
-    const submitLink = document.querySelector('a[href="#submit"]');
+    const submitLink = document.querySelector('#submitButton') || document.querySelector('a[href="#submit"]');
     if (submitLink) {
         submitLink.style.display = 'inline-block';
+        submitLink.style.visibility = 'visible';
+        submitLink.style.opacity = '1';
     }
 }
 
@@ -779,9 +783,11 @@ function logout() {
     }
     
     // Le lien "Soumettre" doit toujours être visible
-    const submitLink = document.querySelector('a[href="#submit"]');
+    const submitLink = document.querySelector('#submitButton') || document.querySelector('a[href="#submit"]');
     if (submitLink) {
         submitLink.style.display = 'inline-block';
+        submitLink.style.visibility = 'visible';
+        submitLink.style.opacity = '1';
     }
     
     // Fermer tous les modals ouverts et nettoyer les backdrops

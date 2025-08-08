@@ -1427,6 +1427,13 @@ section + section {
     padding: 15px 0;
 }
 
+/* Force la visibilité du bouton Soumettre */
+#submitButton {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
 /* Correction pour les sections blanches en mode sombre */
 .dark-mode section {
     background: var(--section-bg);
