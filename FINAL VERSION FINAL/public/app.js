@@ -390,10 +390,10 @@ async function checkAuthStatus() {
     console.log('🔑 adminToken:', adminToken ? 'Présent' : 'Absent');
     console.log('🔑 userToken:', userToken ? 'Présent' : 'Absent');
     
-    // Masquer le lien "Soumettre" par défaut (sera affiché si connecté)
+    // Le lien "Soumettre" doit toujours être visible
     const submitLink = document.querySelector('a[href="#submit"]');
     if (submitLink) {
-        submitLink.style.display = 'none';
+        submitLink.style.display = 'inline-block';
     }
     
     // Vérifier les paramètres de vérification dans l'URL
@@ -427,7 +427,7 @@ async function checkAuthStatus() {
             // car ils sont générés par le système admin
             currentUser = {
                 isAdmin: true,
-                username: 'admin@kghmedia.com'
+                username: 'Administrateur'
             };
             updateUIForAuthenticatedUser();
             console.log('✅ Admin connecté:', currentUser);
@@ -496,7 +496,7 @@ function updateUIForAuthenticatedUser() {
         }
     }
     
-    // Afficher le lien "Soumettre" seulement si connecté
+    // Le lien "Soumettre" doit toujours être visible
     const submitLink = document.querySelector('a[href="#submit"]');
     if (submitLink) {
         submitLink.style.display = 'inline-block';
@@ -778,10 +778,10 @@ function logout() {
         loginLink.removeAttribute('title');
     }
     
-    // Masquer le lien "Soumettre" quand déconnecté
+    // Le lien "Soumettre" doit toujours être visible
     const submitLink = document.querySelector('a[href="#submit"]');
     if (submitLink) {
-        submitLink.style.display = 'none';
+        submitLink.style.display = 'inline-block';
     }
     
     // Fermer tous les modals ouverts et nettoyer les backdrops

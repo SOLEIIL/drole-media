@@ -2283,3 +2283,1075 @@ section + section {
         font-size: 0.85rem;
     }
 } 
+
+/* Correction du scroll pour le dashboard admin sur mobile */
+#adminPanelModal {
+    overflow: hidden !important;
+}
+
+#adminPanelModal .modal-dialog {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+#adminPanelModal .modal-content {
+    height: 100% !important;
+    max-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+#adminPanelModal .modal-header {
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1050 !important;
+    background: var(--modal-bg) !important;
+}
+
+#adminPanelModal .modal-body {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 1rem !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+#adminPanelModal .tab-content {
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+#adminPanelModal .tab-pane {
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+#adminPanelModal .nav-tabs {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1040 !important;
+    background: var(--modal-bg) !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Correction spécifique pour mobile */
+@media (max-width: 768px) {
+    #adminPanelModal {
+        overflow: hidden !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        z-index: 1055 !important;
+    }
+    
+    #adminPanelModal .modal-dialog {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        height: 100vh !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+    }
+    
+    #adminPanelModal .modal-content {
+        border-radius: 0 !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+    
+    #adminPanelModal .modal-header {
+        flex-shrink: 0 !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1060 !important;
+        background: var(--modal-bg) !important;
+        border-bottom: 1px solid #dee2e6 !important;
+    }
+    
+    #adminPanelModal .modal-body {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: 0.75rem !important;
+        -webkit-overflow-scrolling: touch !important;
+        position: relative !important;
+    }
+    
+    #adminPanelModal .nav-tabs {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1055 !important;
+        background: var(--modal-bg) !important;
+        margin-bottom: 1rem !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        border-bottom: 1px solid #dee2e6 !important;
+    }
+    
+    #adminPanelModal .nav-tabs .nav-link {
+        white-space: nowrap !important;
+        min-width: auto !important;
+        flex-shrink: 0 !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 14px !important;
+    }
+    
+    #adminPanelModal .tab-content {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-top: 0.5rem !important;
+        height: calc(100vh - 200px) !important;
+    }
+    
+    #adminPanelModal .tab-pane {
+        height: 100% !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
+
+/* Correction pour les conteneurs de contenu */
+#adminPanelModal #pendingVideosContainer,
+#adminPanelModal #approvedVideosContainer,
+#adminPanelModal #categoriesList,
+#adminPanelModal #partnersList,
+#adminPanelModal #adminUsersContainer {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: calc(100vh - 200px) !important;
+    padding: 0.5rem !important;
+    border-radius: 8px !important;
+    background: #f8f9fa !important;
+    border: 1px solid #e0e0e0 !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Correction spécifique pour les éléments de liste */
+#adminPanelModal .list-group-item {
+    border-radius: 8px !important;
+    margin-bottom: 0.5rem !important;
+    padding: 1rem !important;
+    border: 1px solid #e0e0e0 !important;
+    background: #ffffff !important;
+}
+
+#adminPanelModal .list-group-item:hover {
+    background: #f8f9fa !important;
+    border-color: #007bff !important;
+}
+
+/* Correction pour les tableaux */
+#adminPanelModal table {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 8px !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+#adminPanelModal table th,
+#adminPanelModal table td {
+    padding: 0.75rem !important;
+    border: 1px solid #e0e0e0 !important;
+    vertical-align: middle !important;
+}
+
+#adminPanelModal table th {
+    background: #f8f9fa !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+}
+
+/* Correction pour les cartes dans le dashboard */
+#adminPanelModal .card {
+    margin-bottom: 1rem !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    border: 1px solid #e0e0e0 !important;
+}
+
+#adminPanelModal .card-body {
+    overflow: visible !important;
+    padding: 1rem !important;
+}
+
+#adminPanelModal .card-header {
+    background: #f8f9fa !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+    padding: 1rem !important;
+    font-weight: 600 !important;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+#adminPanelModal .card-footer {
+    background: #f8f9fa !important;
+    border-top: 1px solid #e0e0e0 !important;
+    padding: 1rem !important;
+    border-radius: 0 0 12px 12px !important;
+}
+
+/* Correction pour les boutons et actions */
+#adminPanelModal .btn {
+    touch-action: manipulation !important;
+    min-height: 44px !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+    margin: 0.25rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+#adminPanelModal .btn-sm {
+    min-height: 36px !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 12px !important;
+}
+
+#adminPanelModal .btn-lg {
+    min-height: 48px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 16px !important;
+}
+
+#adminPanelModal .admin-actions {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Correction pour les dropdowns dans le modal */
+#adminPanelModal .dropdown-menu {
+    position: absolute !important;
+    z-index: 1060 !important;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* Correction pour les formulaires */
+#adminPanelModal form {
+    overflow: visible !important;
+}
+
+#adminPanelModal input,
+#adminPanelModal textarea,
+#adminPanelModal select {
+    touch-action: manipulation !important;
+}
+
+/* Correction pour les vidéos dans le dashboard */
+#adminPanelModal video {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Correction pour les images et thumbnails */
+#adminPanelModal img {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Correction pour les tableaux */
+#adminPanelModal table {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* Correction pour les listes */
+#adminPanelModal ul,
+#adminPanelModal ol {
+    overflow: visible !important;
+}
+
+/* Correction pour les divs de contenu */
+#adminPanelModal div {
+    overflow: visible !important;
+}
+
+/* Correction spécifique pour les éléments avec scroll */
+#adminPanelModal .scrollable-content {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: calc(100vh - 250px) !important;
+}
+
+/* Correction pour les modals imbriqués */
+#adminPanelModal .modal {
+    z-index: 1070 !important;
+}
+
+/* Correction pour les tooltips et popovers */
+#adminPanelModal .tooltip,
+#adminPanelModal .popover {
+    z-index: 1080 !important;
+}
+
+/* Correction pour les notifications */
+#adminPanelModal .alert {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Correction pour les badges et étiquettes */
+#adminPanelModal .badge {
+    display: inline-block !important;
+}
+
+/* Correction pour les icônes */
+#adminPanelModal .fas,
+#adminPanelModal .far,
+#adminPanelModal .fab {
+    display: inline-block !important;
+}
+
+/* Correction pour les liens */
+#adminPanelModal a {
+    touch-action: manipulation !important;
+}
+
+/* Correction pour les boutons de fermeture */
+#adminPanelModal .btn-close {
+    touch-action: manipulation !important;
+    z-index: 1055 !important;
+}
+
+/* Correction pour les headers de modal */
+#adminPanelModal .modal-header {
+    border-bottom: 1px solid var(--input-border) !important;
+    background: var(--modal-bg) !important;
+}
+
+/* Correction pour les footers de modal */
+#adminPanelModal .modal-footer {
+    border-top: 1px solid var(--input-border) !important;
+    background: var(--modal-bg) !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 1050 !important;
+}
+
+/* Correction pour les onglets sur mobile */
+@media (max-width: 576px) {
+    #adminPanelModal .nav-tabs {
+        font-size: 0.875rem !important;
+    }
+    
+    #adminPanelModal .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    #adminPanelModal .modal-body {
+        padding: 0.5rem !important;
+    }
+    
+    #adminPanelModal .card {
+        margin-bottom: 0.75rem !important;
+    }
+    
+    #adminPanelModal .card-body {
+        padding: 0.75rem !important;
+    }
+}
+
+/* Correction pour les très petits écrans */
+@media (max-width: 480px) {
+    #adminPanelModal {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    #adminPanelModal .modal-dialog {
+        margin: 0 !important;
+        width: 100% !important;
+        height: 100vh !important;
+        max-width: 100% !important;
+    }
+    
+    #adminPanelModal .modal-content {
+        border-radius: 0 !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    #adminPanelModal .modal-header {
+        padding: 0.75rem !important;
+        border-bottom: 1px solid #dee2e6 !important;
+        flex-shrink: 0 !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1060 !important;
+        background: var(--modal-bg) !important;
+    }
+    
+    #adminPanelModal .modal-body {
+        padding: 0.5rem !important;
+        flex: 1 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    #adminPanelModal .nav-tabs {
+        flex-direction: column !important;
+        overflow-x: visible !important;
+        overflow-y: auto !important;
+        max-height: 200px !important;
+        border-bottom: none !important;
+        margin-bottom: 0.5rem !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1055 !important;
+        background: var(--modal-bg) !important;
+        padding: 0.5rem !important;
+    }
+    
+    #adminPanelModal .nav-tabs .nav-link {
+        text-align: center !important;
+        border-radius: 8px !important;
+        margin-bottom: 0.25rem !important;
+        padding: 0.75rem !important;
+        font-size: 14px !important;
+        border: 1px solid #dee2e6 !important;
+        background: #f8f9fa !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    #adminPanelModal .nav-tabs .nav-link.active {
+        background: #007bff !important;
+        color: white !important;
+        border-color: #007bff !important;
+    }
+    
+    #adminPanelModal .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    #adminPanelModal .btn {
+        min-height: 48px !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 16px !important;
+        margin: 0.25rem 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    #adminPanelModal .btn-sm {
+        min-height: 40px !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 14px !important;
+    }
+    
+    #adminPanelModal .card {
+        margin-bottom: 0.75rem !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    }
+    
+    #adminPanelModal .card-header,
+    #adminPanelModal .card-body,
+    #adminPanelModal .card-footer {
+        padding: 0.75rem !important;
+    }
+    
+    #adminPanelModal table {
+        font-size: 12px !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+    }
+    
+    #adminPanelModal table th,
+    #adminPanelModal table td {
+        padding: 0.5rem !important;
+        font-size: 12px !important;
+    }
+    
+    #adminPanelModal .tab-content {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 0.5rem !important;
+    }
+    
+    #adminPanelModal .tab-pane {
+        height: 100% !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+} 
+
+/* Améliorations générales pour mobile */
+@media (max-width: 768px) {
+    /* Correction du scroll sur mobile */
+    body {
+        -webkit-overflow-scrolling: touch !important;
+        overflow-x: hidden !important;
+    }
+    
+    /* Correction des modals sur mobile */
+    .modal {
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .modal-dialog {
+        margin: 0 !important;
+        max-width: 100% !important;
+        height: 100vh !important;
+    }
+    
+    .modal-content {
+        height: 100vh !important;
+        border-radius: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .modal-header {
+        flex-shrink: 0 !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1050 !important;
+    }
+    
+    .modal-body {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    /* Correction des onglets sur mobile */
+    .nav-tabs {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+    
+    .nav-tabs::-webkit-scrollbar {
+        display: none !important;
+    }
+    
+    .nav-tabs .nav-link {
+        white-space: nowrap !important;
+        min-width: auto !important;
+        flex-shrink: 0 !important;
+        touch-action: manipulation !important;
+    }
+    
+    /* Correction des boutons sur mobile */
+    .btn {
+        touch-action: manipulation !important;
+        min-height: 44px !important;
+        min-width: 44px !important;
+    }
+    
+    /* Correction des inputs sur mobile */
+    input, textarea, select {
+        touch-action: manipulation !important;
+        font-size: 16px !important; /* Évite le zoom sur iOS */
+    }
+    
+    /* Correction des liens sur mobile */
+    a {
+        touch-action: manipulation !important;
+    }
+    
+    /* Correction des dropdowns sur mobile */
+    .dropdown-menu {
+        max-height: 200px !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    /* Correction des cartes sur mobile */
+    .card {
+        margin-bottom: 1rem !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    /* Correction des vidéos sur mobile */
+    video {
+        max-width: 100% !important;
+        height: auto !important;
+        touch-action: manipulation !important;
+    }
+    
+    /* Correction des images sur mobile */
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+    
+    /* Correction des tableaux sur mobile */
+    table {
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    /* Correction des formulaires sur mobile */
+    form {
+        overflow: visible !important;
+    }
+    
+    /* Correction des listes sur mobile */
+    ul, ol {
+        overflow: visible !important;
+    }
+    
+    /* Correction des divs sur mobile */
+    div {
+        overflow: visible !important;
+    }
+    
+    /* Correction des notifications sur mobile */
+    .alert {
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Correction des badges sur mobile */
+    .badge {
+        display: inline-block !important;
+    }
+    
+    /* Correction des icônes sur mobile */
+    .fas, .far, .fab {
+        display: inline-block !important;
+    }
+    
+    /* Correction des tooltips sur mobile */
+    .tooltip {
+        display: none !important; /* Désactive les tooltips sur mobile */
+    }
+    
+    /* Correction des popovers sur mobile */
+    .popover {
+        max-width: 90vw !important;
+    }
+    
+    /* Correction des modals imbriqués */
+    .modal .modal {
+        z-index: 1070 !important;
+    }
+    
+    /* Correction des headers de modal */
+    .modal-header {
+        border-bottom: 1px solid var(--input-border) !important;
+        background: var(--modal-bg) !important;
+    }
+    
+    /* Correction des footers de modal */
+    .modal-footer {
+        border-top: 1px solid var(--input-border) !important;
+        background: var(--modal-bg) !important;
+        position: sticky !important;
+        bottom: 0 !important;
+        z-index: 1050 !important;
+    }
+}
+
+/* Améliorations pour très petits écrans */
+@media (max-width: 576px) {
+    .nav-tabs {
+        font-size: 0.875rem !important;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    .modal-body {
+        padding: 0.75rem !important;
+    }
+    
+    .card {
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    .btn {
+        font-size: 0.875rem !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    .form-control {
+        font-size: 16px !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+}
+
+/* Améliorations pour très très petits écrans */
+@media (max-width: 480px) {
+    .nav-tabs {
+        font-size: 0.8rem !important;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.375rem 0.5rem !important;
+    }
+    
+    .modal-body {
+        padding: 0.5rem !important;
+    }
+    
+    .card-body {
+        padding: 0.5rem !important;
+    }
+    
+    .btn {
+        font-size: 0.8rem !important;
+        padding: 0.375rem 0.5rem !important;
+    }
+    
+    .form-control {
+        font-size: 16px !important;
+        padding: 0.375rem 0.5rem !important;
+    }
+}
+
+/* Correction spécifique pour iOS */
+@supports (-webkit-touch-callout: none) {
+    .modal {
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .modal-body {
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .nav-tabs {
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    input, textarea, select {
+        font-size: 16px !important;
+    }
+}
+
+/* Correction spécifique pour Android */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .modal {
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .modal-body {
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .nav-tabs {
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
+
+// ... existing code ...
+
+#userDashboardModal .modal-dialog {
+    max-width: 85%;
+    margin: 1.75rem auto;
+}
+
+/* CORRECTIONS MOBILE SCROLL POUR DASHBOARD UTILISATEUR */
+#userDashboardModal {
+    overflow: hidden !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 1055 !important;
+}
+
+#userDashboardModal .modal-dialog {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    max-width: 100% !important;
+}
+
+#userDashboardModal .modal-content {
+    height: 100% !important;
+    max-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border-radius: 0 !important;
+}
+
+#userDashboardModal .modal-header {
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1060 !important;
+    background: var(--modal-bg) !important;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+#userDashboardModal .modal-body {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 1rem !important;
+    -webkit-overflow-scrolling: touch !important;
+    position: relative !important;
+}
+
+#userDashboardModal .tab-content {
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex: 1 !important;
+}
+
+#userDashboardModal .tab-pane {
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex: 1 !important;
+}
+
+#userDashboardModal .nav-tabs {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1040 !important;
+    background: var(--modal-bg) !important;
+    margin-bottom: 1rem !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* Styles pour les boutons dans le dashboard utilisateur */
+#userDashboardModal .btn {
+    min-height: 44px !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+    margin: 0.25rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+#userDashboardModal .btn-sm {
+    min-height: 38px !important;
+    padding: 0.375rem 0.75rem !important;
+    font-size: 13px !important;
+}
+
+#userDashboardModal .btn-lg {
+    min-height: 50px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 16px !important;
+}
+
+/* Styles pour les cartes dans le dashboard utilisateur */
+#userDashboardModal .card {
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    border: 1px solid #e0e0e0 !important;
+}
+
+#userDashboardModal .card-body {
+    padding: 1.25rem !important;
+    background: #ffffff !important;
+}
+
+#userDashboardModal .card-header {
+    padding: 1rem 1.25rem !important;
+    background: #f8f9fa !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+}
+
+#userDashboardModal .card-footer {
+    padding: 1rem 1.25rem !important;
+    background: #f8f9fa !important;
+    border-top: 1px solid #e0e0e0 !important;
+}
+
+/* Styles pour les conteneurs de contenu */
+#userDashboardModal #userVideosContainer,
+#userDashboardModal #userProfileContainer,
+#userDashboardModal #userSettingsContainer {
+    padding: 0.5rem !important;
+    border-radius: 8px !important;
+    background: #f8f9fa !important;
+    border: 1px solid #e0e0e0 !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Styles pour les éléments de liste */
+#userDashboardModal .list-group-item {
+    border-radius: 8px !important;
+    margin-bottom: 0.5rem !important;
+    padding: 1rem !important;
+    border: 1px solid #e0e0e0 !important;
+    background: #ffffff !important;
+}
+
+#userDashboardModal .list-group-item:hover {
+    background: #f8f9fa !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Styles pour les tableaux */
+#userDashboardModal table {
+    border-radius: 8px !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+#userDashboardModal table th,
+#userDashboardModal table td {
+    padding: 0.75rem !important;
+    border: 1px solid #e0e0e0 !important;
+}
+
+/* Media queries pour mobile */
+@media (max-width: 768px) {
+    #userDashboardModal .nav-tabs {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        flex-wrap: nowrap !important;
+    }
+    
+    #userDashboardModal .nav-tabs .nav-link {
+        white-space: nowrap !important;
+        min-width: auto !important;
+        flex-shrink: 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #userDashboardModal {
+        padding: 0 !important;
+    }
+    
+    #userDashboardModal .modal-dialog {
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    
+    #userDashboardModal .modal-content {
+        border-radius: 0 !important;
+        height: 100vh !important;
+    }
+    
+    #userDashboardModal .modal-header {
+        padding: 0.75rem 1rem !important;
+        font-size: 14px !important;
+    }
+    
+    #userDashboardModal .modal-body {
+        padding: 0.75rem !important;
+    }
+    
+    #userDashboardModal .nav-tabs {
+        flex-direction: column !important;
+        overflow-x: visible !important;
+        overflow-y: auto !important;
+    }
+    
+    #userDashboardModal .nav-tabs .nav-link {
+        border-radius: 8px !important;
+        margin-bottom: 0.25rem !important;
+        text-align: center !important;
+        padding: 0.75rem !important;
+    }
+    
+    #userDashboardModal .card-body {
+        padding: 1rem !important;
+    }
+    
+    #userDashboardModal .btn {
+        width: 100% !important;
+        margin: 0.25rem 0 !important;
+        justify-content: center !important;
+    }
+    
+    #userDashboardModal .card {
+        margin-bottom: 1rem !important;
+    }
+    
+    #userDashboardModal .card-header,
+    #userDashboardModal .card-footer {
+        padding: 0.75rem 1rem !important;
+    }
+    
+    #userDashboardModal table {
+        font-size: 14px !important;
+    }
+    
+    #userDashboardModal table th,
+    #userDashboardModal table td {
+        padding: 0.5rem !important;
+    }
+    
+    #userDashboardModal .tab-content {
+        padding: 0.5rem !important;
+    }
+    
+    #userDashboardModal .tab-pane {
+        padding: 0.5rem !important;
+    }
+}

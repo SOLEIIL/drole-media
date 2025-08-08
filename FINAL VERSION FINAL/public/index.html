@@ -132,7 +132,7 @@
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="video" class="form-label">Fichier vidéo</label>
+                                    <label for="video" class="form-label">Fichier vidéo *</label>
                                     <input type="file" class="form-control" id="video" name="video" accept="video/*" required>
                                     <small class="text-muted">Formats acceptés : MP4, AVI, MOV, WMV, FLV, WebM</small>
                                 </div>
@@ -145,7 +145,7 @@
                                     <div class="card-body">
                                         <!-- Question 1: Avez-vous enregistré la vidéo ? -->
                                         <div class="mb-4">
-                                            <label class="form-label fw-bold">Avez-vous enregistré la vidéo ?</label>
+                                            <label class="form-label fw-bold">Avez-vous enregistré la vidéo ? *</label>
                                             <div class="btn-group w-100" role="group">
                                                 <input type="radio" class="btn-check" name="recordedVideo" id="recordedYes" value="yes" required>
                                                 <label class="btn btn-outline-primary" for="recordedYes">Oui</label>
@@ -170,7 +170,7 @@
                                         
                                         <!-- Question 2: Possédez-vous les droits d'auteur ? -->
                                         <div class="mb-4">
-                                            <label class="form-label fw-bold">Possédez-vous les droits d'auteur ?</label>
+                                            <label class="form-label fw-bold">Possédez-vous les droits d'auteur ? *</label>
                                             <div class="btn-group w-100" role="group">
                                                 <input type="radio" class="btn-check" name="copyrightOwnership" id="copyrightYes" value="yes" required>
                                                 <label class="btn btn-outline-primary" for="copyrightYes">Oui</label>
@@ -211,14 +211,14 @@
                                                 <input class="form-check-input" type="checkbox" id="termsAgreement" required>
                                                 <label class="form-check-label" for="termsAgreement">
                                                     J'accepte les <strong><u><a href="#" id="termsLink" class="terms-link">Conditions de soumission</a></u></strong> et la <strong><u><a href="#" id="privacyLink" class="terms-link">Politique de confidentialité</a></u></strong> 
-                                                    et certifie par la présente que toutes les informations fournies ci-dessus sont complètes et exactes.
+                                                    et certifie par la présente que toutes les informations fournies ci-dessus sont complètes et exactes. *
                                                 </label>
                                             </div>
                                         </div>
                                         
                                         <!-- Signature -->
                                         <div class="mb-3">
-                                            <label for="signature" class="form-label">Veuillez signer</label>
+                                            <label for="signature" class="form-label">Veuillez signer *</label>
                                             <input type="text" class="form-control" id="signature" name="signature" 
                                                    placeholder="Tapez votre nom complet pour signer" required>
                                             <small class="text-muted">En tapant votre nom, vous confirmez que toutes les informations sont exactes</small>
@@ -390,7 +390,7 @@
     </div>
 
     <!-- Modal Panel Admin -->
-    <div class="modal fade" id="adminPanelModal" tabindex="-1">
+    <div class="modal fade" id="adminPanelModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -422,7 +422,7 @@
                             <a class="nav-link" data-bs-toggle="tab" href="#users">Gestion des utilisateurs</a>
                         </li>
                     </ul>
-                    <div class="tab-content mt-3">
+                    <div class="tab-content mt-3 scrollable-content">
                         <div class="tab-pane fade show active" id="pendingVideos">
                             <div id="pendingVideosContainer">
                                 <!-- Vidéos en attente -->
@@ -536,7 +536,7 @@
     </div>
 
     <!-- Modal Dashboard Utilisateur -->
-    <div class="modal fade" id="userDashboardModal" tabindex="-1">
+    <div class="modal fade" id="userDashboardModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -561,7 +561,7 @@
                         </li>
                     </ul>
                     
-                    <div class="tab-content">
+                    <div class="tab-content scrollable-content">
                         <!-- Onglet Mes Vidéos -->
                         <div class="tab-pane fade show active" id="myVideos">
                             <div class="row mb-3">
@@ -1280,7 +1280,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=1.3"></script>
+            <script src="app.js?v=2.0"></script>
     <script src="debug_videos.js"></script>
 </body>
 </html> 
