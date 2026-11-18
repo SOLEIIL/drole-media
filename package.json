@@ -16,7 +16,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.17.0",
     "multer": "^2.0.2",
-    "nodemailer": "^7.0.5"
+    "nodemailer": "^10.1.4"
   },
   "keywords": [
     "video",
